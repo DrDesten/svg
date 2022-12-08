@@ -23,8 +23,8 @@ class SVGTemplate {
 
     /** @param {(SVGObject: this, millisecondsSinceInitialisation: number)=>void} updateFunction */
     onUpdate( updateFunction ) { return this.updateCallback = updateFunction, this }
-
-    // Style ///////////////////////////////////////////////
+    
+    // Style //////////////////////////////////////////////////
     
     /** @param {string} cssColor */
     fill( cssColor )   { return this.set("fill", cssColor), this }
@@ -40,7 +40,27 @@ class SVGTemplate {
     opacity( opacity ) { return this.set("opacity", opacity), this }
 
 
-    // Static ///////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////
+    // Static
+    ///////////////////////////////////////////////////////////////////
+
+    // Coordinate Maniputaion /////////////////////////////////
+
+    /** 
+     * Returns a point on a circle given an angle, radius and center  
+     * @param {number} angle 
+     * @param {number} radius 
+     * @param {[number,number]|{x:number,y:number}} center 
+     **/
+    static circlePoint( angle, radius = 1, center = [0,0] ) {
+        return { 
+            x: Math.sin(angle) * radius + center[0] ?? center.x, 
+            y: Math.cos(angle) * radius + center[1] ?? center.y,
+            asArray: function() { return [ this.x, this.y ] }
+        }
+    }
+
+    // Defaults //////////////////////////////////////////////
 
     /** @returns {Object.<string,string>} */
     static get lineDefaults() { return {
@@ -90,13 +110,12 @@ class SVGArc extends SVGTemplate {
     update( millisecondsSinceInitialisation = Infinity ) {
         if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
-        const center = { x: this.centerPosition[0], y: this.centerPosition[1] }
         const angles = { start: this.startAngle, end: this.endAngle }
         const radius = this.circularRadius
 
         // Calculate Start and End Positions using basic trigonometry
-        let startPos = { x: Math.sin(angles.start) * radius + center.x, y: Math.cos(angles.start) * radius + center.y }
-        let endPos   = { x: Math.sin(angles.end)   * radius + center.x, y: Math.cos(angles.end)   * radius + center.y}
+        let startPos = SVGTemplate.circlePoint( this.startAngle, this.circularRadius, this.centerPosition )
+        let endPos   = SVGTemplate.circlePoint( this.endAngle,   this.circularRadius, this.centerPosition )
         // Prevent Flicker when startPos == endPos
         if ( Math.abs(startPos.x - endPos.x) < 0.0001 ) startPos.x += 0.0001
         if ( Math.abs(startPos.y - endPos.y) < 0.0001 ) startPos.y += 0.0001
@@ -110,8 +129,6 @@ class SVGArc extends SVGTemplate {
         path += `${+((angularLength > -0.5 && angularLength < 0) || (angularLength > 0.5 && angularLength < 1))} ` // Angle Flag ( true (1) when angular length is larger than 180° )
         path += `0 `                             // Sweep Flag
         path += `${endPos.x} ${endPos.y}`        // Set end Position
-
-        //console.log(angularLength)
 
         this.set("d", path)
         return this
@@ -169,12 +186,11 @@ class SVGLine extends SVGTemplate {
         
         if ( this.coordinateMode == "angle" ) {
 
-            const unitCircle = [ Math.sin(this.angleMode.angle), Math.cos(this.angleMode.angle) ]
-            const startPos   = unitCircle.map( (x,i) => x * this.angleMode.startRadius + this.angleMode.center[i] )
-            const endPos     = unitCircle.map( (x,i) => x * this.angleMode.endRadius   + this.angleMode.center[i] )
+            const startPos   = SVGTemplate.circlePoint( this.angleMode.angle, this.angleMode.startRadius, this.angleMode.center )
+            const endPos     = SVGTemplate.circlePoint( this.angleMode.angle, this.angleMode.endRadius,   this.angleMode.center )
 
-            return this.set("x1", startPos[0]).set("y1", startPos[1])
-                       .set("x2", endPos[0])  .set("y2", endPos[1])
+            return this.set("x1", startPos.x).set("y1", startPos.y)
+                       .set("x2", endPos.x)  .set("y2", endPos.y)
         }
         
         throw new Error(`Mode '${this.coordinateMode}' not Recognized. Available Modes are: 'point', 'angle'`)
