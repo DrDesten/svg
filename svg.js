@@ -212,7 +212,7 @@ class SVGGlobal {
         parent.appendChild( this.svg )
     }
 
-    /** @param {SVGTemplate[]} SVGElements */
+    /** @param {SVGTemplate[]} SVGElements Adds new children to the SVG */
     add( ...SVGElements ) {
         for ( const ele of SVGElements ) this.svg.appendChild( ele.ele )
         return this
