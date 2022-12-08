@@ -37,7 +37,7 @@ function fadeInSmoothest( fadeTime , startDelay = 0 ) {
 }
 
 
-const globalSVG = SVG( "#clock" )
+const globalSVG = new SVG( "#clock" )
 
 
 colors = ["#213","#6de","#8fb"]
@@ -123,8 +123,8 @@ for ( let i = 0; i < hourLineCount; i++ ) {
     )
 }
 
-for (const line of handleLines) globalSVG.appendChild(line.ele)
-for (const handle of handles)   globalSVG.appendChild(handle.ele)
+for (const line of handleLines) globalSVG.add(line)
+for (const handle of handles)   globalSVG.add(handle)
 
 requestAnimationFrame(update = function(time) {
     for (const handle of handles)     handle.update(time)

@@ -182,38 +182,45 @@ class SVGLine extends SVGTemplate {
 
 }
 
+class SVGGlobal {
+    /**
+     * Return a SVG, bound to a parent.  
+     * Elements within it are relatively positioned [ 0 - 100 ]
+     * @param {string} parentQuerySelector
+     */
+    constructor( parentQuerySelector ) {
+        // Size in pixels of SVG
+        const initSize = 100
+    
+        // Get parent via querySelector
+        const parent = document.querySelector( parentQuerySelector )
+        if (parent == null) throw new Error(`SVG(): Unable to bind parent. QuerySelector '${parentQuerySelector}' doesn't match a DOM element`)
+    
+        // Create SVG
+        this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
+        this.svg.setAttribute("style", `width: ${initSize}px; height: ${initSize}px`)
+    
+        // Change the SVG scale with the parent
+        const resizeObserver = new ResizeObserver( entries => { 
+            const entry = entries[0]
+            const size  = [ entry.target.clientWidth, entry.target.clientHeight ]
+            this.svg.style.transform = `translate(${(size[0]-initSize)/2}px,${(size[1]-initSize)/2}px) scale(${size[0]/100},-${size[1]/100})`
+        })
+        resizeObserver.observe(parent)
+    
+        // Add SVG to parent
+        parent.appendChild( this.svg )
+    }
 
-/**
- * Return a SVG, bound to a parent.  
- * Elements within it are relatively positioned [ 0 - 100 ]
- * @param {string} parentQuerySelector
- */
-function createSVG( parentQuerySelector ) {
-    // Size in pixels of SVG
-    const initSize = 100
-
-    // Get parent via querySelector
-    const parent = document.querySelector( parentQuerySelector )
-    if (parent == null) throw new Error(`SVG(): Unable to bind parent. QuerySelector '${parentQuerySelector}' doesn't match a DOM element`)
-
-    // Create SVG
-    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-    svg.setAttribute("style", `width: ${initSize}px; height: ${initSize}px`)
-
-    // Change the SVG scale with the parent
-    const resizeObserver = new ResizeObserver( entries => { 
-        const entry = entries[0]
-        const size  = [ entry.target.clientWidth, entry.target.clientHeight ]
-        svg.style.transform = `translate(${(size[0]-initSize)/2}px,${(size[1]-initSize)/2}px) scale(${size[0]/100},-${size[1]/100})`
-    })
-    resizeObserver.observe(parent)
-
-    // Add SVG to parent
-    parent.appendChild( svg )
-    return svg
+    /** @param {SVGTemplate[]} SVGElements */
+    add( ...SVGElements ) {
+        for ( const ele of SVGElements ) this.svg.appendChild( ele.ele )
+        return this
+    }
 }
 
-const SVG = Object.assign( createSVG, {
+const SVG = Object.assign( 
+    SVGGlobal, {
     line: SVGLine,
     arc: SVGArc
 })
