@@ -1,47 +1,38 @@
-/* const SVG = Object.assign(
-    // Constructor Function /////////////////////////
-    function( tag ) {
-        if (tag == undefined) {
-            this.ele = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-            this.ele.setAttribute("style", "width: 100%; height: 100%")
-            return this
-        }
-        this.ele = document.createElementNS("http://www.w3.org/2000/svg", tag)
-        return this
-    },
 
-    // Object Members ///////////////////////////////
-    {
-        addTo: function( querySelector ) {
-            document.querySelector(querySelector).appendChild( this.ele )
-            return this
-        }
+
+function saturate( x ) {
+    return Math.max(0, Math.min(1, x))
+}
+function smoothstepRaw( x ) {
+    return (3 - 2 * x) * x * x
+}
+function smoothstep( x, start, end ) {
+    x = saturate( ( x - start ) / ( end - start ) )
+    return smoothstepRaw(x)
+}
+function smootherstep( x, start, end ) {
+    x = saturate( ( x - start ) / ( end - start ) )
+    return smoothstepRaw(smoothstepRaw(x))
+}
+function smootheststep( x, start, end ) {
+    x = saturate( ( x - start ) / ( end - start ) )
+    return smoothstepRaw(smoothstepRaw(smoothstepRaw(x)))
+}
+function fadeIn( fadeTime, startDelay = 0 ) {
+    return function( time ) {
+        return smoothstep( time, startDelay, fadeTime + startDelay)
     }
-) */
-
-/* class SVG {
-    constructor( tag ) {
-        if (tag == undefined) {
-            this.ele = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-            this.ele.setAttribute("style", "width: 100%; height: 100%")
-            this.tag = "svg"
-        } else {
-            this.ele = document.createElementNS("http://www.w3.org/2000/svg", tag)
-            this.tag = tag
-        }
+}
+function fadeInSmooth( fadeTime , startDelay = 0 ) {
+    return function( time ) {
+        return smootherstep( time, startDelay, fadeTime + startDelay)
     }
-
-    addTo( querySelector ) {
-        document.querySelector( querySelector ).appendChild( this.ele )
-        return this
+}
+function fadeInSmoother( fadeTime , startDelay = 0 ) {
+    return function( time ) {
+        return smootheststep( time, startDelay, fadeTime + startDelay)
     }
-
-    add( ele ) {
-        this.ele.appendChild( ele )
-        return this
-    }
-
-} */
+}
 
 /**
  * Return a SVG, bound to a parent.  
@@ -66,48 +57,40 @@ function SVG( parentQuerySelector ) {
     return svg
 }
 
+class SGVElement {
+    /** @param {string} type */
+    constructor( ) {
+        /* this.ele = document.createElementNS("http://www.w3.org/2000/svg", type)
+        this.attributes = {} */
+    }
+    /** @param {string} attribute @param {string} value */
+    set( attribute, value ) { return this.ele.setAttribute( attribute, value ), this.attributes[attribute] = value, this }
 
-function SVGCircle() {
-    return document.createElementNS("http://www.w3.org/2000/svg", "circle")
+    // Animation ///////////////////////////////////////////////
+
+    /** @param {(millisecondsSinceInitialisation: number)=>void} updateFunction */
+    onUpdate( updateFunction ) {
+        return this.applyUpdate = updateFunction, this
+    }
+
+    // Style ///////////////////////////////////////////////
+    
+    /** @param {string} cssColor */
+    fill( cssColor )   { return this.set("fill", cssColor), this }
+    /** @param {string} cssColor */
+    color( cssColor )  { return this.set("stroke", cssColor), this }
+
+    /** @param {number} width */
+    width( width )     { return this.set("stroke-width", width), this }
+    /** @param {string} linecap */
+    linecap( linecap ) { return this.set("stroke-linecap", linecap), this }
+
+    /** @param {number} opacity */
+    opacity( opacity ) { return this.set("opacity", opacity), this }
+
 }
 
-function Circle() { return {
-    ele: document.createElementNS("http://www.w3.org/2000/svg", "circle"),
-    set r( radius ) { this.ele.setAttribute("r", radius) },
-    set fill( color ) { this.ele.setAttribute("fill", color) },
-    set transform( opts ) { this.ele.setAttribute("transform", opts) },
-}}
-
-
-class SVGPath {
-    constructor() {
-        this.ele    = document.createElementNS("http://www.w3.org/2000/svg", "path")
-        this.points = []
-    }
-
-    set() {
-        this.ele.setAttribute( ...arguments )
-        return this
-    }
-
-    /** @param {string} type @param {[number,number]} coordinates */
-    addPoint( type, coordinates ) {
-        if (this.points.length == 0) this.points.push(`M ${coordinates[0]} ${coordinates[1]}`)
-        else this.points.push(`${type} ${coordinates[0]} ${coordinates[1]}`)
-    }
-
-    moveTo( x, y ) { this.addPoint("M", [x,y]); return this }
-    lineTo( x, y ) { this.addPoint("L", [x,y]); return this }
-
-    get element() {
-        if (this.points.length) fthis.ele.setAttribute("d", this.points.join(" "))
-        return this.ele
-    }
-}
-
-
-
-class PathArc {
+class SVGArc  {
     constructor( opts = {} ) {
         this.ele = document.createElementNS("http://www.w3.org/2000/svg", "path")
 
@@ -115,6 +98,8 @@ class PathArc {
         this.startAngle     = 0
         this.endAngle       = 0
         this.circularRadius = 0
+
+        this.attributes = {}
 
         const defaults = {
             "fill": "none",
@@ -138,6 +123,12 @@ class PathArc {
     angles( startAngle, endAngle ) {
         this.startAngle = startAngle
         this.endAngle   = endAngle
+        return this
+    }
+    /** @param {number} startAngle @param {number} endAngle */
+    anglesNormalized( startAngle, endAngle ) {
+        this.startAngle = startAngle * Math.PI * 2
+        this.endAngle   = endAngle * Math.PI * 2
         return this
     }
     /** @param {number} radius */
@@ -178,7 +169,7 @@ class PathArc {
     // Animation ///////////////////////////////////////////////
 
     /** @param {(millisecondsSinceInitialisation: number)=>void} updateFunction */
-    setUpdate( updateFunction ) {
+    onUpdate( updateFunction ) {
         this.applyUpdate = updateFunction
         return this
     }
@@ -199,63 +190,50 @@ class PathArc {
 svg = SVG( "#clock" )
 
 
-circle = Circle()
-circle.fill = "gray"
-circle.r = "5"
-circle.transform = "translate(50,50)"
-
-const arc = new PathArc()
-arc.center(50, 50)
-arc.radius(40)
-
-const timewarp = 250
-function fadeIn( fadeTime, startDelay = 0 ) {
-    return function( time ) {
-        time = Math.min(1,Math.max(0, (time - startDelay) / fadeTime))
-        return (3 - 2 * time) * time * time
-    }
-}
-
+const timewarp = 1
 const handles = [
-    new PathArc().center(50,50).radius(40).color("#222").width(8).setUpdate( function(time) {
+    new SVGArc().center(50,50).radius(40).color("#213").width(10).onUpdate( function(time) {
         // Hour Handle
-        const fade = fadeIn(2000, 4000)(time)
-
         const milliseconds = Date.now() - new Date().setHours(0,0,0,0)
-        const days         = milliseconds * timewarp / 1000 / 60 / 60 / 24 // Days since Midnight
-        const offset       = (fade - 1) * Math.PI
-        this.angles(offset, offset + days * Math.PI * 2)
+        const days         = milliseconds * timewarp / 1000 / 60 / 60 / 24 % 1 // Days since Midnight
         
-        this.opacity( fade )
+        const fadeIn   = fadeInSmooth(3000, 1500)(time)
+        const fadeWrap = smootheststep( days, (3600*24-4)/(3600*24), 1 ) * fadeIn
+        const offset   = (fadeIn - 1) * .5
+        this.anglesNormalized(offset + fadeWrap * days, offset + fadeIn * days)
+        
+        this.opacity( fadeIn )
         //console.log("days", days)
     }).update(),
-    new PathArc().center(50,50).radius(33).color("#fe8").width(4).setUpdate( function(time) {
+    new SVGArc().center(50,50).radius(31).color("#6de").width(6).onUpdate( function(time) {
         // Minute Handle
-        const fade = fadeIn(2500, 3000)(time)
-
         const milliseconds = Date.now() - new Date().setMinutes(0,0,0)
-        const hours        = milliseconds * timewarp / 1000 / 60 / 60 // Hours since last Hour
-        const offset       = (fade - 1) * Math.PI
-        this.angles(offset, offset + hours * Math.PI * 2)
+        const hours        = milliseconds * timewarp / 1000 / 60 / 60 % 1// Hours since last Hour
         
-        this.opacity( fade )
+        const fadeIn   = fadeInSmooth(3500, 1000)(time)
+        const fadeWrap = smootheststep( hours, 3596/3600, 1 ) * fadeIn
+        const offset   = (fadeIn - 1) * .5
+        this.anglesNormalized(offset + fadeWrap * hours, offset + fadeIn * hours)
+        
+        this.opacity( fadeIn )
         //console.log("hours", hours)
     }).update(),
-    new PathArc().center(50,50).radius(29).color("#ddd").width(2).setUpdate( function(time) {
+    new SVGArc().center(50,50).radius(25).color("#8fb").width(4).onUpdate( function(time) {
         // Second Handle
-        const fade = fadeIn(3000, 2000)(time)
-
         const milliseconds = Date.now() - new Date().setSeconds(0,0)
-        const minutes      = milliseconds * timewarp / 1000 / 60 // Minutes since last minute
-        const offset       = (fade - 1) * Math.PI
-        this.angles(offset, offset + minutes * Math.PI * 2)
+        const minutes      = milliseconds * timewarp / 1000 / 60 % 1 // Minutes since last minute
+        
+        const fadeIn   = fadeInSmooth(4000, 500)(time)
+        const fadeWrap = smootheststep( minutes, 56/60, 1 ) * fadeIn
+        const offset   = (fadeIn - 1) * .5
+        this.anglesNormalized(offset + fadeWrap * minutes, offset + fadeIn * minutes)
 
-        this.opacity( fade )
+        this.opacity( fadeIn )
         //console.log("minutes", minutes)
     }).update(),
 ]
 
-svg.appendChild(circle.ele)
+//svg.appendChild(circle.ele)
 for (const handle of handles) svg.appendChild(handle.ele)
 
 console.log(handles)
