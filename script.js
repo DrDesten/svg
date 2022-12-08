@@ -187,7 +187,7 @@ class SVGArc  {
 
 
 
-svg = SVG( "#clock" )
+const globalSVG = SVG( "#clock" )
 
 
 const timewarp = 1
@@ -199,11 +199,9 @@ const handles = [
         
         const fadeIn   = fadeInSmoothest(5500, 200)(time)
         const fadeWrap = smootheststep( days, (3600*24-5)/(3600*24), 1 ) * fadeIn
-        const offset   = (fadeIn - 1)
+        const offset   = (fadeIn - 1) * 1.2
         this.anglesNormalized(offset + fadeWrap * days, offset + fadeIn * days)
-        
         this.opacity( fadeIn )
-        //console.log("days", days)
     }).update(),
     new SVGArc().center(50,50).radius(30).color("#6de").width(8).onUpdate( function(time) {
         // Minute Handle
@@ -212,11 +210,9 @@ const handles = [
         
         const fadeIn   = fadeInSmoother(4750, 200)(time)
         const fadeWrap = smootheststep( hours, 3595/3600, 1 ) * fadeIn
-        const offset   = (fadeIn - 1)
+        const offset   = (fadeIn - 1) * 1.1
         this.anglesNormalized(offset + fadeWrap * hours, offset + fadeIn * hours)
-        
         this.opacity( fadeIn )
-        //console.log("hours", hours)
     }).update(),
     new SVGArc().center(50,50).radius(22).color("#8fb").width(6).onUpdate( function(time) {
         // Second Handle
@@ -227,17 +223,11 @@ const handles = [
         const fadeWrap = smootheststep( minutes, 55/60, 1 ) * fadeIn
         const offset   = (fadeIn - 1)
         this.anglesNormalized(offset + fadeWrap * minutes, offset + fadeIn * minutes)
-
         this.opacity( fadeIn )
-        //console.log("minutes", minutes)
     }).update(),
 ]
 
-//svg.appendChild(circle.ele)
-for (const handle of handles) svg.appendChild(handle.ele)
-
-console.log(handles)
-
+for (const handle of handles) globalSVG.appendChild(handle.ele)
 requestAnimationFrame(update = function(time) {
     for (const handle of handles) handle.update(time)
     requestAnimationFrame(update)
