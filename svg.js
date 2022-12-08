@@ -184,7 +184,7 @@ class SVGLine extends SVGTemplate {
 
 
 /**
- * Return a SVG, bound to a parent.
+ * Return a SVG, bound to a parent.  
  * Elements within it are relatively positioned [ 0 - 100 ]
  * @param {string} parentQuerySelector
  */
