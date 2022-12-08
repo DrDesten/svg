@@ -304,7 +304,7 @@ for ( let i = 0; i < lineCount; i++ ) {
         }).update()
     ),
     handleLines.push(
-        new SVGLine().mode("angle").center(50,50).radii(28,32).width(i % 5 ? 0.75 : 1 ).color( i % 15 ? "#888" : "red" ).angleNormalized( i / lineCount ).onUpdate( function( obj, time ) {
+        new SVGLine().mode("angle").center(50,50).radii(28,32).width(i % 5 ? 0.75 : 1 ).color( i % 15 ? "#888" : "#d11" ).angleNormalized( i / lineCount ).onUpdate( function( obj, time ) {
             // Minute Handle
             const milliseconds = Date.now() - new Date().setMinutes(0,0,0)
             const handleAngle  = milliseconds * timewarp / 1000 / 60 / 60 % 1 // Hours since last Hour
