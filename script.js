@@ -300,7 +300,6 @@ for ( let i = 0; i < lineCount; i++ ) {
             const distanceFade = ( 1 - mod( i / lineCount - handleAngle, 1 ) ) ** 15
 
             this.opacity( distanceFade * fadeIn )
-                
         }).update()
     ),
     handleLines.push(
