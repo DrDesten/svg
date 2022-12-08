@@ -44,7 +44,7 @@ colors = ["#213","#6de","#8fb"]
 
 const timewarp = 1
 const handles = [
-    new SVG.arc().center(50,50).radius(40).color("#d11").width(10).onUpdate( function(obj, time) {
+    new SVG.arc().center(50).radius(40).color("#d11").width(10).onUpdate( function(obj, time) {
         // Hour Handle
         const milliseconds = Date.now() - new Date().setHours(0,0,0,0)
         const days         = milliseconds * timewarp / 1000 / 60 / 60 / 12 % 1 // Days since Midnight
@@ -55,7 +55,7 @@ const handles = [
         this.anglesNormalized(offset + fadeWrap * days, offset + fadeIn * days)
         this.opacity( fadeIn )
     }).update(),
-    new SVG.arc().center(50,50).radius(30).color("#fff").width(8).onUpdate( function(obj, time) {
+    new SVG.arc().center(50).radius(30).color("#fff").width(8).onUpdate( function(obj, time) {
         // Minute Handle
         const milliseconds = Date.now() - new Date().setMinutes(0,0,0)
         const hours        = milliseconds * timewarp / 1000 / 60 / 60 % 1 // Hours since last Hour
@@ -66,7 +66,7 @@ const handles = [
         this.anglesNormalized(offset + fadeWrap * hours, offset + fadeIn * hours)
         this.opacity( fadeIn )
     }).update(),
-    new SVG.arc().center(50,50).radius(22).color("#666").width(6).onUpdate( function(obj, time) {
+    new SVG.arc().center(50).radius(22).color("#666").width(6).onUpdate( function(obj, time) {
         // Second Handle
         const milliseconds = Date.now() - new Date().setSeconds(0,0)
         const minutes      = milliseconds * timewarp / 1000 / 60 % 1 // Minutes since last minute
@@ -83,7 +83,7 @@ const handleLines = []
 const lineCount = 60
 for ( let i = 0; i < lineCount; i++ ) {
     handleLines.push(
-        new SVG.line().mode("angle").center(50,50).radii(20.5,23.5).width(0.5).color("#888").angleNormalized( i / lineCount ).onUpdate( function( obj, time ) {
+        new SVG.line().mode("angle").center(50).radii(20.5,23.5).width(0.5).color("#888").angleNormalized( i / lineCount ).onUpdate( function( obj, time ) {
             // Second Handle
             const milliseconds = Date.now() - new Date().setSeconds(0,0)
             const handleAngle  = milliseconds * timewarp / 1000 / 60 % 1 // Minutes since last minute
@@ -95,7 +95,7 @@ for ( let i = 0; i < lineCount; i++ ) {
         }).update()
     ),
     handleLines.push(
-        new SVG.line().mode("angle").center(50,50).radii(28,32).width(i % 5 ? 0.75 : 1 ).color( i % 15 ? "#888" : "#d11" ).angleNormalized( i / lineCount ).onUpdate( function( obj, time ) {
+        new SVG.line().mode("angle").center(50).radii(28,32).width(i % 5 ? 0.75 : 1 ).color( i % 15 ? "#888" : "#d11" ).angleNormalized( i / lineCount ).onUpdate( function( obj, time ) {
             // Minute Handle
             const milliseconds = Date.now() - new Date().setMinutes(0,0,0)
             const handleAngle  = milliseconds * timewarp / 1000 / 60 / 60 % 1 // Hours since last Hour
@@ -110,7 +110,7 @@ for ( let i = 0; i < lineCount; i++ ) {
 const hourLineCount = 12
 for ( let i = 0; i < hourLineCount; i++ ) {
     handleLines.push(
-        new SVG.line().mode("angle").center(50,50).radii(37,43).width(2).color( i % 3 ? "#888" : "#d11" ).angleNormalized( i / hourLineCount ).onUpdate( function( obj, time ) {
+        new SVG.line().mode("angle").center(50).radii(37,43).width(2).color( i % 3 ? "#888" : "#d11" ).angleNormalized( i / hourLineCount ).onUpdate( function( obj, time ) {
             // Second Handle
             const milliseconds = Date.now() - new Date().setSeconds(0,0)
             const handleAngle  = milliseconds * timewarp / 1000 / 60 / 60 / 12 % 1 // Days since Midnight

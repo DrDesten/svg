@@ -64,9 +64,9 @@ class SVGArc extends SVGTemplate {
         this.setDefaults(SVGTemplate.lineDefaults, opts)
     }
 
-    /** @param {number} x @param {number} y */
+    /** @param {number} x @param {number=} y */
     center( x,y ) {
-        this.centerPosition = [ x, y ]
+        this.centerPosition = [ x, y ?? x ]
         return this
     }
     /** @param {number} startAngle @param {number} endAngle */
@@ -140,13 +140,13 @@ class SVGLine extends SVGTemplate {
     /** @param {"point"|"angle"} coordinateMode */
     mode( coordinateMode ) { return this.coordinateMode = coordinateMode, this }
 
-    /** @param {number} x @param {number} y */
-    start( x,y ) { return this.pointMode.start = [x,y], this.set("x1", x).set("y1", y) }
-    /** @param {number} x @param {number} y */
-    end( x,y )   { return this.pointMode.end = [x,y],   this.set("x2", x).set("y2", y) }
+    /** @param {number} x @param {number=} y */
+    start( x,y ) { return this.pointMode.start = [x,y??x], this.set("x1", x).set("y1", y) }
+    /** @param {number} x @param {number=} y */
+    end( x,y )   { return this.pointMode.end = [x,y??x],   this.set("x2", x).set("y2", y) }
 
-    /** @param {number} x @param {number} y */
-    center( x,y )    { return this.angleMode.center = [x,y], this }
+    /** @param {number} x @param {number=} y */
+    center( x,y )    { return this.angleMode.center = [x,y??x], this }
     /** @param {number} a */
     angle( a )       { return this.angleMode.angle = a, this }
     /** @param {number} a */
