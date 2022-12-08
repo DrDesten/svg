@@ -18,17 +18,17 @@ function smootheststep( x, start, end ) {
     x = saturate( ( x - start ) / ( end - start ) )
     return smoothstepRaw(smoothstepRaw(smoothstepRaw(x)))
 }
-function fadeIn( fadeTime, startDelay = 0 ) {
+function fadeInSmooth( fadeTime, startDelay = 0 ) {
     return function( time ) {
         return smoothstep( time, startDelay, fadeTime + startDelay)
     }
 }
-function fadeInSmooth( fadeTime , startDelay = 0 ) {
+function fadeInSmoother( fadeTime , startDelay = 0 ) {
     return function( time ) {
         return smootherstep( time, startDelay, fadeTime + startDelay)
     }
 }
-function fadeInSmoother( fadeTime , startDelay = 0 ) {
+function fadeInSmoothest( fadeTime , startDelay = 0 ) {
     return function( time ) {
         return smootheststep( time, startDelay, fadeTime + startDelay)
     }
@@ -197,35 +197,35 @@ const handles = [
         const milliseconds = Date.now() - new Date().setHours(0,0,0,0)
         const days         = milliseconds * timewarp / 1000 / 60 / 60 / 24 % 1 // Days since Midnight
         
-        const fadeIn   = fadeInSmooth(3000, 1500)(time)
-        const fadeWrap = smootheststep( days, (3600*24-4)/(3600*24), 1 ) * fadeIn
-        const offset   = (fadeIn - 1) * .5
+        const fadeIn   = fadeInSmoothest(5500, 200)(time)
+        const fadeWrap = smootheststep( days, (3600*24-5)/(3600*24), 1 ) * fadeIn
+        const offset   = (fadeIn - 1)
         this.anglesNormalized(offset + fadeWrap * days, offset + fadeIn * days)
         
         this.opacity( fadeIn )
         //console.log("days", days)
     }).update(),
-    new SVGArc().center(50,50).radius(31).color("#6de").width(6).onUpdate( function(time) {
+    new SVGArc().center(50,50).radius(30).color("#6de").width(8).onUpdate( function(time) {
         // Minute Handle
         const milliseconds = Date.now() - new Date().setMinutes(0,0,0)
         const hours        = milliseconds * timewarp / 1000 / 60 / 60 % 1// Hours since last Hour
         
-        const fadeIn   = fadeInSmooth(3500, 1000)(time)
-        const fadeWrap = smootheststep( hours, 3596/3600, 1 ) * fadeIn
-        const offset   = (fadeIn - 1) * .5
+        const fadeIn   = fadeInSmoother(4750, 200)(time)
+        const fadeWrap = smootheststep( hours, 3595/3600, 1 ) * fadeIn
+        const offset   = (fadeIn - 1)
         this.anglesNormalized(offset + fadeWrap * hours, offset + fadeIn * hours)
         
         this.opacity( fadeIn )
         //console.log("hours", hours)
     }).update(),
-    new SVGArc().center(50,50).radius(25).color("#8fb").width(4).onUpdate( function(time) {
+    new SVGArc().center(50,50).radius(22).color("#8fb").width(6).onUpdate( function(time) {
         // Second Handle
         const milliseconds = Date.now() - new Date().setSeconds(0,0)
         const minutes      = milliseconds * timewarp / 1000 / 60 % 1 // Minutes since last minute
         
-        const fadeIn   = fadeInSmooth(4000, 500)(time)
-        const fadeWrap = smootheststep( minutes, 56/60, 1 ) * fadeIn
-        const offset   = (fadeIn - 1) * .5
+        const fadeIn   = fadeInSmooth(4000, 0)(time)
+        const fadeWrap = smootheststep( minutes, 55/60, 1 ) * fadeIn
+        const offset   = (fadeIn - 1)
         this.anglesNormalized(offset + fadeWrap * minutes, offset + fadeIn * minutes)
 
         this.opacity( fadeIn )
