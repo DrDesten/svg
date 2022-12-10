@@ -77,13 +77,12 @@ class SVGArc extends SVGTemplate {
      */
     constructor( opts = {} ) {
         super( "path" )
+        this.setDefaults(SVGTemplate.lineDefaults, opts)
 
         this.centerPosition = [0,0]
         this.startAngle = 0
         this.endAngle = 0
         this.circularRadius = 0
-
-        this.setDefaults(SVGTemplate.lineDefaults, opts)
     }
 
     /** 
