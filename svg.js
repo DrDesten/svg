@@ -235,7 +235,7 @@ class SVGLine extends SVGTemplate {
                        .set("x2", endPos.x)  .set("y2", endPos.y)
         }
         
-        throw new Error(`Mode '${this.coordinateMode}' not Recognized. Available Modes are: 'point', 'angle'`)
+        throw new Error(`Positioning mode '${this.coordinateMode}' not recognized. Available modes are: 'point', 'angle'`)
     }
 
 }
@@ -283,32 +283,51 @@ class SVGRect extends SVGTemplate {
     constructor( opts = {} ) {
         super( "rect" )
         this.setDefaults(SVGTemplate.fillDefaults, opts)
-
+        
         this.coordinateMode = "corner"
         this.rectangleDimensions = [0,0]
         this.rectanglePosition = [0,0]
         this.borderRadii = [0,0]
     }
 
-    /** @param {"center"|"corner"} coordinateMode */
+    /**
+     * Sets the coordinate mode for the rectangle.
+     * @param {"center"|"corner"} coordinateMode - The coordinate mode to use. Possible values are "center" and "corner".
+     */
     mode( coordinateMode ) { return this.coordinateMode = coordinateMode, this }
 
-    /** @param {number} width @param {number=} height */
+    /**
+     * Sets the dimensions of the rectangle.
+     * @param {number} width - The width of the rectangle.
+     * @param {number=} height - The height of the rectangle. If not provided, the width is used for both width and height.
+     */
     dimensions( width, height ) { return this.rectangleDimensions = [width,height??width], this }
-    /** @param {number} x @param {number=} y */
+
+    /**
+     * Sets the position of the rectangle.
+     * @param {number} x - The x coordinate of the rectangle.
+     * @param {number=} y - The y coordinate of the rectangle. If not provided, the x coordinate is used for both x and y.
+     */
     position( x, y ) { return this.rectanglePosition = [x,y??x], this }
-    /** @param {number} rx @param {number=} ry */
+
+    /**
+     * Sets the border radii of the rectangle.
+     * @param {number} rx - The x coordinate of the border radius.
+     * @param {number=} ry - The y coordinate of the border radius. If not provided, the x coordinate is used for both x and y.
+     */
     radius( rx, ry ) { return this.borderRadii = [rx,ry??rx], this }
 
     /** 
-     * Updates the circle to reflect any changes to its properties.
+     * Updates the rectangle to reflect any changes to its properties.
      * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
      */
-     update( millisecondsSinceInitialisation = Infinity ) {
+    update( millisecondsSinceInitialisation = Infinity ) {
         // If an update callback function has been set, call it.
         if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
         
         if ( this.coordinateMode == "center" ) {
+
+            // If the coordinate mode is "center", calculate the rectangle position based on its dimensions and the center position.
             const [width,height] = this.rectangleDimensions
             const [x,y] = this.rectanglePosition
             this.set("x", x - width/2)
@@ -317,7 +336,10 @@ class SVGRect extends SVGTemplate {
                 .set("height", height)
                 .set("rx", this.borderRadii[0])
                 .set("ry", this.borderRadii[1])
+
         } else if ( this.coordinateMode == "corner" ) {
+
+            // If the coordinate mode is "corner", use the rectangle dimensions and position as-is.
             const [width,height] = this.rectangleDimensions
             const [x,y] = this.rectanglePosition
             this.set("x", x)
@@ -326,10 +348,12 @@ class SVGRect extends SVGTemplate {
                 .set("height", height)
                 .set("rx", this.borderRadii[0])
                 .set("ry", this.borderRadii[1])
+
         } else {
+            // If the coordinate mode is not recognized, throw an error.
             throw new Error(`Positioning mode '${this.coordinateMode}' not recognized. Available modes are: 'center', 'corner'`)
         }
-
+        
         return this
     }
 }
