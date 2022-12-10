@@ -242,9 +242,6 @@ class SVGPath extends SVGTemplate {
         this.set("d", path)
         return this
     }
-
-    /** @param {(SVGObject: this, millisecondsSinceInitialisation: number)=>void} updateFunction */
-    onUpdate( updateFunction ) { return this.updateCallback = updateFunction, this }
 }
 
 
