@@ -12,6 +12,9 @@ body {
 #waterworld {
     width: min(80vh, 80vw);
     height: min(80vh, 80vw);
-    filter: drop-shadow(0 0 4em #aaa);
+
+    border-radius: 50%;
+
+    filter: drop-shadow(0 0 4em rgb(189, 189, 217));
 }
 
