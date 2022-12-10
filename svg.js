@@ -177,6 +177,59 @@ class SVGArc extends SVGTemplate {
 
 }
 
+class SVGPath extends SVGTemplate {
+    /** @param {Object.<string,string>} opts */
+    constructor( opts = {} ) {
+        super( "path" )
+        this.setDefaults(SVGTemplate.lineDefaults, opts)
+
+        this.pathMode   = "line"
+        /** @type {{type: string, x: number, y:number}[]} */
+        this.pathPoints = []
+    }
+
+
+    /** 
+     * Adds a point to the path.
+     * @param {number} x - The x coordinate of the point.
+     * @param {number=} y - The y coordinate of the point. If not provided, the x coordinate is used for both x and y.
+     */
+    point( x, y ) {
+        this.pathPoints.push({ type: "line", x: x, y: y ?? x })
+        return this
+    }
+
+    /**
+     * Closes the path
+     */
+    close() {
+        this.pathPoints.push({ type: "close" })
+        return this
+    }
+
+    // Animation ///////////////////////////////////////////////
+
+    /** @param {number} millisecondsSinceInitialisation */
+    update( millisecondsSinceInitialisation = Infinity ) { 
+        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+
+        // Update the d attribute with the new positions of the points
+        let d = ""
+        for ( const [index, point] of this.pathPoints.entries() ) {
+            if ( point.type == "close" ) d += `Z`
+            else if ( index == 0 ) d += `M ${point.x} ${point.y}`
+            else d += ` L ${point.x} ${point.y}`
+        }
+        this.set("d", d)
+
+        return this
+    }
+
+    /** @param {(SVGObject: this, millisecondsSinceInitialisation: number)=>void} updateFunction */
+    onUpdate( updateFunction ) { return this.updateCallback = updateFunction, this }
+}
+
+
 class SVGLine extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
@@ -276,7 +329,7 @@ class SVGCircle extends SVGTemplate {
     }
 }
 
-class SVGRect extends SVGTemplate {
+class SVGRectangle extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
         super( "rect" )
@@ -356,8 +409,6 @@ class SVGRect extends SVGTemplate {
     }
 }
 
-
-
 class SVGGlobal {
     /**
      * Returns a new SVG element, bound to a parent element specified by a query selector.
@@ -407,8 +458,9 @@ class SVGGlobal {
 
 const SVG = Object.assign( 
     SVGGlobal, {
-    rect: SVGRect,
+    rect: SVGRectangle,
     circle: SVGCircle,
     line: SVGLine,
-    arc: SVGArc
+    path: SVGPath,
+    arc: SVGArc,
 })
