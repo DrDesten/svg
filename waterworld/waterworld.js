@@ -9,7 +9,7 @@ const centerY = 50
 const paths = []
 
 // Create the paths
-for ( let i = 0; i < 5; i++ ) {
+for ( let i = 0; i < 6; i++ ) {
     const path = new SVG.path()
 
     // Add the first point of the circle
@@ -25,7 +25,10 @@ for ( let i = 0; i < 5; i++ ) {
 
     path.close()
     path.width(5)
-    path.color("lightblue")
+
+    // Set a different shade of blue for each path
+    path.color(`rgb(0, 0, ${i * 255/5})`)
+
     path.update()
 
     // Set a different rate of rotation for each path
