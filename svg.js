@@ -244,40 +244,46 @@ class SVGLine extends SVGTemplate {
 
 class SVGGlobal {
     /**
-     * Return a SVG, bound to a parent.  
-     * Elements within it are relatively positioned [ 0 - 100 ]
-     * @param {string} parentQuerySelector - The query selector used to find the parent element for the SVG image
+     * Returns a new SVG element, bound to a parent element specified by a query selector.
+     * The SVG element will take up the entire size of the parent element, with its elements positioned relatively within a [0, 100] range.
+     * @param {string} parentQuerySelector - The query selector used to find the parent element for the SVG image.
      */
     constructor( parentQuerySelector ) {
-        // Size in pixels of SVG
+        // The initial size of the SVG element in pixels.
         const initSize = 100
 
-        // Get parent via querySelector
+        // Get the parent element using the provided query selector.
         const parent = document.querySelector( parentQuerySelector )
-        if (parent == null) throw new Error(`SVG(): Unable to bind parent. QuerySelector '${parentQuerySelector}' doesn't match a DOM element`)
+        if (parent == null) {
+            throw new Error(`SVG(): Unable to bind parent. Query selector '${parentQuerySelector}' does not match a DOM element.`)
+        }
 
-        // Create SVG
+        // Create the SVG element.
         this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
         this.svg.setAttribute("style", `width: ${initSize}px; height: ${initSize}px`)
 
-        // Change the SVG scale with the parent
-        const resizeObserver = new ResizeObserver( entries => { 
+        // Change the SVG scale with the parent element size.
+        const resizeObserver = new ResizeObserver( entries => {
+            // Get the size of the parent element.
             const entry = entries[0]
-            const size  = [ entry.target.clientWidth, entry.target.clientHeight ]
+            const size = [ entry.target.clientWidth, entry.target.clientHeight ]
+
+            // Scale the SVG element according to the parent size.
             this.svg.style.transform = `translate(${(size[0]-initSize)/2}px,${(size[1]-initSize)/2}px) scale(${size[0]/100},-${size[1]/100})`
         })
         resizeObserver.observe(parent)
 
-        // Add SVG to parent
+        // Add the SVG element to the parent element.
         parent.appendChild( this.svg )
     }
 
     /** 
-     * Adds new children to the SVG 
-     * @param {SVGTemplate[]} SVGElements - The elements to be added as children to the SVG image
+     * Adds new children to the SVG element.
+     * @param {SVGTemplate[]} SVGElements - The elements to be added as children of the SVG image.
      */
     add( ...SVGElements ) {
-        for ( const ele of SVGElements ) this.svg.appendChild( ele.ele )
+        for ( const ele of SVGElements )
+            this.svg.appendChild( ele.ele )
         return this
     }
 }
