@@ -183,11 +183,16 @@ class SVGPath extends SVGTemplate {
         super( "path" )
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
+        /** @type {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'close'} */
         this.pathMode   = "line"
         /** @type {{type: string, x: number, y:number}[]} */
         this.pathPoints = []
     }
 
+    /**
+     * Sets the path mode, which determines how subsequent points in the path will be connected.
+     * @param {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'close'} mode - The path mode to set.
+     */
     mode( mode ) { return this.pathMode = mode, this }
 
     /** 
@@ -198,13 +203,16 @@ class SVGPath extends SVGTemplate {
     point( x, y ) { return this.pathPoints.push({ type: this.pathMode, x: x, y: y ?? x }), this }
 
     /**
-     * Closes the path
+     * Closes the path.
      */
     close() { return this.pathPoints.push({ type: "close" }), this }
 
     // Animation ///////////////////////////////////////////////
 
-    /** @param {number} millisecondsSinceInitialisation */
+    /** 
+     * Updates the path.
+     * @param {number} millisecondsSinceInitialisation - The number of milliseconds that have elapsed since the path was initialized.
+     */
     update( millisecondsSinceInitialisation = Infinity ) { 
         if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
