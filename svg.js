@@ -277,6 +277,63 @@ class SVGCircle extends SVGTemplate {
     }
 }
 
+// Made by ChatGPT
+class SVGRect extends SVGTemplate {
+    /** @param {Object.<string,string>} opts */
+    constructor( opts = {} ) {
+        super( "rect" )
+        this.setDefaults(SVGTemplate.fillDefaults, opts)
+
+        this.coordinateMode = "corner"
+        this.rectangleDimensions = [0,0]
+        this.rectanglePosition = [0,0]
+        this.borderRadii = [0,0]
+    }
+
+    /** @param {"center"|"corner"} coordinateMode */
+    mode( coordinateMode ) { return this.coordinateMode = coordinateMode, this }
+
+    /** @param {number} width @param {number=} height */
+    dimensions( width, height ) { return this.rectangleDimensions = [width,height??width], this }
+    /** @param {number} x @param {number=} y */
+    position( x, y ) { return this.rectanglePosition = [x,y??x], this }
+    /** @param {number} rx @param {number=} ry */
+    radius( rx, ry ) { return this.borderRadii = [rx,ry??rx], this }
+
+    /** 
+     * Updates the circle to reflect any changes to its properties.
+     * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
+     */
+     update( millisecondsSinceInitialisation = Infinity ) {
+        // If an update callback function has been set, call it.
+        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+        
+        if ( this.coordinateMode == "center" ) {
+            const [width,height] = this.rectangleDimensions
+            const [x,y] = this.rectanglePosition
+            this.set("x", x - width/2)
+                .set("y", y - height/2)
+                .set("width", width)
+                .set("height", height)
+                .set("rx", this.borderRadii[0])
+                .set("ry", this.borderRadii[1])
+        } else if ( this.coordinateMode == "corner" ) {
+            const [width,height] = this.rectangleDimensions
+            const [x,y] = this.rectanglePosition
+            this.set("x", x)
+                .set("y", y)
+                .set("width", width)
+                .set("height", height)
+                .set("rx", this.borderRadii[0])
+                .set("ry", this.borderRadii[1])
+        } else {
+            throw new Error(`Positioning mode '${this.coordinateMode}' not recognized. Available modes are: 'center', 'corner'`)
+        }
+
+        return this
+    }
+}
+
 
 
 class SVGGlobal {
