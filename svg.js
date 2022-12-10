@@ -188,24 +188,19 @@ class SVGPath extends SVGTemplate {
         this.pathPoints = []
     }
 
+    mode( mode ) { return this.pathMode = mode, this }
 
     /** 
      * Adds a point to the path.
      * @param {number} x - The x coordinate of the point.
      * @param {number=} y - The y coordinate of the point. If not provided, the x coordinate is used for both x and y.
      */
-    point( x, y ) {
-        this.pathPoints.push({ type: "line", x: x, y: y ?? x })
-        return this
-    }
+    point( x, y ) { return this.pathPoints.push({ type: this.pathMode, x: x, y: y ?? x }), this }
 
     /**
      * Closes the path
      */
-    close() {
-        this.pathPoints.push({ type: "close" })
-        return this
-    }
+    close() { return this.pathPoints.push({ type: "close" }), this }
 
     // Animation ///////////////////////////////////////////////
 
@@ -213,15 +208,32 @@ class SVGPath extends SVGTemplate {
     update( millisecondsSinceInitialisation = Infinity ) { 
         if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
-        // Update the d attribute with the new positions of the points
-        let d = ""
-        for ( const [index, point] of this.pathPoints.entries() ) {
-            if ( point.type == "close" ) d += `Z`
-            else if ( index == 0 ) d += `M ${point.x} ${point.y}`
-            else d += ` L ${point.x} ${point.y}`
-        }
-        this.set("d", d)
+        let path = ""
+        for ( const [i, point] of this.pathPoints.entries() ) {
+            if ( point.type == "close" || point.type == "Z" ) { 
+                path += "Z"
+                break 
+            }
 
+            if ( i == 0 ) path += "M"
+            else switch ( point.type ) {
+                case "line", "L":
+                    path += "L"
+                    break
+                case "bezier", "cubic bezier", "C", "S":
+                    path += "S"
+                    break
+                case "quadratic bezier", "Q", "T":
+                    path += "T"
+                    break
+                default:
+                    throw new Error(`SVGPath.update(): Unexpected Point Type '${point.type}'`)
+            }
+
+            path += ` ${point.x} ${point.y} `
+        }
+
+        this.set("d", path)
         return this
     }
 
