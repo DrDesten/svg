@@ -240,7 +240,6 @@ class SVGLine extends SVGTemplate {
 
 }
 
-// Made by ChatGPT
 class SVGCircle extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
@@ -277,7 +276,6 @@ class SVGCircle extends SVGTemplate {
     }
 }
 
-// Made by ChatGPT
 class SVGRect extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
@@ -409,6 +407,8 @@ class SVGGlobal {
 
 const SVG = Object.assign( 
     SVGGlobal, {
+    rect: SVGRect,
+    circle: SVGCircle,
     line: SVGLine,
     arc: SVGArc
 })
