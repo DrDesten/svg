@@ -217,13 +217,19 @@ class SVGPath extends SVGTemplate {
 
             if ( i == 0 ) path += "M"
             else switch ( point.type ) {
-                case "line", "L":
+                case "line":
+                case "L":
                     path += "L"
                     break
-                case "bezier", "cubic bezier", "C", "S":
+                case "bezier":
+                case "cubic bezier":
+                case "C":
+                case "S":
                     path += "S"
                     break
-                case "quadratic bezier", "Q", "T":
+                case "quadratic bezier":
+                case "Q":
+                case "T":
                     path += "T"
                     break
                 default:
