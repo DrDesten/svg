@@ -72,69 +72,111 @@ class SVGTemplate {
 }
 
 class SVGArc extends SVGTemplate {
-    /** @param {Object.<string,string>} opts */
+    /** 
+     * @param {Object.<string,string>} opts
+     */
     constructor( opts = {} ) {
         super( "path" )
 
         this.centerPosition = [0,0]
-        this.startAngle     = 0
-        this.endAngle       = 0
+        this.startAngle = 0
+        this.endAngle = 0
         this.circularRadius = 0
 
         this.setDefaults(SVGTemplate.lineDefaults, opts)
     }
 
-    /** @param {number} x @param {number=} y */
+    /** 
+     * Sets the center position of the arc.
+     * @param {number} x - The x coordinate of the center.
+     * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
+     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
+     */
     center( x,y ) {
         this.centerPosition = [ x, y ?? x ]
         return this
     }
-    /** @param {number} startAngle @param {number} endAngle */
+
+    /** 
+     * Sets the start and end angles of the arc.
+     * @param {number} startAngle - The starting angle of the arc, in radians.
+     * @param {number} endAngle - The ending angle of the arc, in radians.
+     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
+     */
     angles( startAngle, endAngle ) {
         this.startAngle = startAngle
-        this.endAngle   = endAngle
+        this.endAngle = endAngle
         return this
     }
-    /** @param {number} startAngle @param {number} endAngle */
+
+    /** 
+     * Sets the start and end angles of the arc, given as values between 0 and 1.
+     * @param {number} startAngle - The starting angle of the arc, as a value between 0 and 1.
+     * @param {number} endAngle - The ending angle of the arc, as a value between 0 and 1.
+     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
+     */
     anglesNormalized( startAngle, endAngle ) {
         this.startAngle = startAngle * Math.PI * 2
-        this.endAngle   = endAngle * Math.PI * 2
+        this.endAngle = endAngle * Math.PI * 2
         return this
     }
-    /** @param {number} radius */
+
+    /** 
+     * Sets the radius of the circular arc.
+     * @param {number} radius - The radius of the circular arc.
+     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
+     */
     radius( radius ) {
         this.circularRadius = radius
         return this
     }
 
+    /** 
+     * Updates the arc to reflect any changes to its properties.
+     * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
+     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
+     */
     update( millisecondsSinceInitialisation = Infinity ) {
+        // If an update callback function has been set, call it.
         if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
+        // Store the start and end angles in an object.
         const angles = { start: this.startAngle, end: this.endAngle }
+        // Store the circular radius in a variable.
         const radius = this.circularRadius
 
-        // Calculate Start and End Positions using basic trigonometry
+        // Calculate the start and end positions using basic trigonometry.
         let startPos = SVGTemplate.circlePoint( this.startAngle, this.circularRadius, this.centerPosition )
-        let endPos   = SVGTemplate.circlePoint( this.endAngle,   this.circularRadius, this.centerPosition )
-        // Prevent Flicker when startPos == endPos
+        let endPos = SVGTemplate.circlePoint( this.endAngle, this.circularRadius, this.centerPosition )
+        // Prevent flicker when the start and end positions are almost the same.
         if ( Math.abs(startPos.x - endPos.x) < 0.0001 ) startPos.x += 0.0001
         if ( Math.abs(startPos.y - endPos.y) < 0.0001 ) startPos.y += 0.0001
 
+        // Calculate the angular length of the arc.
         let angularLength = (angles.end - angles.start) / ( Math.PI * 2 ) % 1
 
+        // Initialize the "path" string that will be used to define the SVG path element.
         let path = ""
-        path += `M ${startPos.x} ${startPos.y} ` // Set Start Position
-        path += `A ${radius} ${radius} `         // Arc Start: Radius
-        path += `0 `                             // Ellipse Rotation
-        path += `${+((angularLength > -0.5 && angularLength < 0) || (angularLength > 0.5 && angularLength < 1))} ` // Angle Flag ( true (1) when angular length is larger than 180° )
-        path += `0 `                             // Sweep Flag
-        path += `${endPos.x} ${endPos.y}`        // Set end Position
+        // Set the rotation of the arc.
+        path += `M ${startPos.x} ${startPos.y} `
+        // Define the start of the arc.
+        path += `A ${radius} ${radius} `
+        // Set the ellipse rotation to 0.
+        path += `0 `
+        // Set the angle flag to true (1) if the angular length is larger than 180 degrees.
+        path += `${+((angularLength > -0.5 && angularLength < 0) || (angularLength > 0.5 && angularLength < 1))} `
+        // Set the sweep flag to 0.
+        path += `0 `
+        // Set the end position of the arc.
+        path += `${endPos.x} ${endPos.y}`
 
+        // Set the "d" attribute of the SVG path element to the "path" string.
         this.set("d", path)
         return this
     }
 
 }
+
 class SVGLine extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
@@ -202,20 +244,20 @@ class SVGGlobal {
     /**
      * Return a SVG, bound to a parent.  
      * Elements within it are relatively positioned [ 0 - 100 ]
-     * @param {string} parentQuerySelector
+     * @param {string} parentQuerySelector - The query selector used to find the parent element for the SVG image
      */
     constructor( parentQuerySelector ) {
         // Size in pixels of SVG
         const initSize = 100
-    
+
         // Get parent via querySelector
         const parent = document.querySelector( parentQuerySelector )
         if (parent == null) throw new Error(`SVG(): Unable to bind parent. QuerySelector '${parentQuerySelector}' doesn't match a DOM element`)
-    
+
         // Create SVG
         this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
         this.svg.setAttribute("style", `width: ${initSize}px; height: ${initSize}px`)
-    
+
         // Change the SVG scale with the parent
         const resizeObserver = new ResizeObserver( entries => { 
             const entry = entries[0]
@@ -223,17 +265,21 @@ class SVGGlobal {
             this.svg.style.transform = `translate(${(size[0]-initSize)/2}px,${(size[1]-initSize)/2}px) scale(${size[0]/100},-${size[1]/100})`
         })
         resizeObserver.observe(parent)
-    
+
         // Add SVG to parent
         parent.appendChild( this.svg )
     }
 
-    /** @param {SVGTemplate[]} SVGElements Adds new children to the SVG */
+    /** 
+     * Adds new children to the SVG 
+     * @param {SVGTemplate[]} SVGElements - The elements to be added as children to the SVG image
+     */
     add( ...SVGElements ) {
         for ( const ele of SVGElements ) this.svg.appendChild( ele.ele )
         return this
     }
 }
+
 
 const SVG = Object.assign( 
     SVGGlobal, {
