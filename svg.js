@@ -266,8 +266,6 @@ class SVGPath extends SVGTemplate {
 }
 
 
-
-
 class SVGLine extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
@@ -352,6 +350,43 @@ class SVGCircle extends SVGTemplate {
      * @param {number} r - The radius of the circle.
      */
     radius( r ) { return this.circularRadius = r, this }
+
+    /** 
+     * Updates the circle to reflect any changes to its properties.
+     * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
+     */
+    update( millisecondsSinceInitialisation = Infinity ) {
+        // If an update callback function has been set, call it.
+        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+
+        // Update the SVG circle element to reflect the current center and radius values.
+        this.set("cx", this.centerPosition[0]).set("cy", this.centerPosition[1]).set("r", this.circularRadius)
+        return this
+    }
+}
+
+class SVGEllipse extends SVGTemplate {
+    /** @param {Object.<string,string>} opts */
+    constructor( opts = {} ) {
+        super( "ellipse" )
+        this.setDefaults(SVGTemplate.fillDefaults, opts)
+
+        this.centerPosition = [0,0]
+        this.ellipseRadii   = [0,0]
+    }
+
+    /** 
+     * Sets the center position of the circle.
+     * @param {number} x - The x coordinate of the center.
+     * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
+     */
+    center( x, y ) { return this.centerPosition = [ x, y ?? x ], this }
+    /** 
+     * Sets the radius of the circle.
+     * @param {number} r1 - The radius of the circle.
+     * @param {number} r2 - The radius of the circle.
+     */
+    radius( rx, ry ) { return this.ellipseRadii = [ rx, ry ?? rx ], this }
 
     /** 
      * Updates the circle to reflect any changes to its properties.
