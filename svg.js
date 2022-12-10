@@ -183,7 +183,7 @@ class SVGPath extends SVGTemplate {
         super( "path" )
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
-        /** @type {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'close'|'custom'} */
+        /** @type {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'custom'} */
         this.pathMode   = "line"
         /** @type {{type: string, x: number, y:number, custom?:string}[]} */
         this.pathPoints = []
@@ -191,7 +191,7 @@ class SVGPath extends SVGTemplate {
 
     /**
      * Sets the path mode, which determines how subsequent points in the path will be connected.
-     * @param {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'close'|'custom'} mode - The path mode to set.
+     * @param {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'custom'} mode - The path mode to set.
      */
     mode( mode ) { return this.pathMode = mode, this }
 
@@ -203,7 +203,7 @@ class SVGPath extends SVGTemplate {
     point( x, y ) { 
         this.pathPoints.push(
             this.pathMode == "custom" ?
-            { type: this.pathMode, custom: x } :
+            { type: this.pathMode, x: NaN, y: NaN, custom: x } :
             { type: this.pathMode, x: x, y: y ?? x }
         )
         return this 
@@ -230,38 +230,41 @@ class SVGPath extends SVGTemplate {
                 break 
             }
 
-            if ( i == 0 ) path += "M"
+            if ( i == 0 ) path += `M ${point.x} ${point.y} `
             else switch ( point.type ) {
                 case "line":
                 case "L":
-                    path += "L"
+                    path += `L ${point.x} ${point.y} `
                     break
                 case "bezier":
                 case "cubic bezier":
                 case "C":
                 case "S":
-                    path += "S"
+                    // Calculate control point coordinates
+                    const previousPoint = this.pathPoints[i-1]
+                    const controlPointX = previousPoint.x + (point.x - previousPoint.x) / 2
+                    const controlPointY = previousPoint.y + (point.y - previousPoint.y) / 2
+                    path += `S ${controlPointX} ${controlPointY} ${point.x} ${point.y} `
                     break
                 case "quadratic bezier":
                 case "Q":
                 case "T":
-                    path += "T"
+                    path += `T ${point.x} ${point.y} `
                     break
                 case "custom":
                     path += ` ${point.custom} `
                     break
                 default:
                     throw new Error(`SVGPath.update(): Unexpected Point Type '${point.type}'`)
-                }
-    
-                if ( point.type != "custom" ) path += ` ${point.x} ${point.y} `
             }
     
-            this.set("d", path)
-            return this
         }
-    }
     
+        this.set("d", path)
+        return this
+    }
+}
+
 
 
 

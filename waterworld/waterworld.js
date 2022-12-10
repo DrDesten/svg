@@ -27,7 +27,7 @@ for ( let i = 0; i < 6; i++ ) {
     path.width(5)
 
     // Set a different shade of blue for each path
-    path.color(`rgb(0, 0, ${i * 255/5})`)
+    path.color(`rgb(0, 0, ${i * 255/6})`)
 
     path.update()
 
