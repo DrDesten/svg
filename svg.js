@@ -183,24 +183,31 @@ class SVGPath extends SVGTemplate {
         super( "path" )
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
-        /** @type {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'close'} */
+        /** @type {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'close'|'custom'} */
         this.pathMode   = "line"
-        /** @type {{type: string, x: number, y:number}[]} */
+        /** @type {{type: string, x: number, y:number, custom?:string}[]} */
         this.pathPoints = []
     }
 
     /**
      * Sets the path mode, which determines how subsequent points in the path will be connected.
-     * @param {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'close'} mode - The path mode to set.
+     * @param {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'close'|'custom'} mode - The path mode to set.
      */
     mode( mode ) { return this.pathMode = mode, this }
 
     /** 
      * Adds a point to the path.
-     * @param {number} x - The x coordinate of the point.
+     * @param {number|string} x - The x coordinate of the point, or a custom string when mode has been set to "custom"
      * @param {number=} y - The y coordinate of the point. If not provided, the x coordinate is used for both x and y.
      */
-    point( x, y ) { return this.pathPoints.push({ type: this.pathMode, x: x, y: y ?? x }), this }
+    point( x, y ) { 
+        this.pathPoints.push(
+            this.pathMode == "custom" ?
+            { type: this.pathMode, custom: x } :
+            { type: this.pathMode, x: x, y: y ?? x }
+        )
+        return this 
+    }
 
     /**
      * Closes the path.
@@ -240,17 +247,22 @@ class SVGPath extends SVGTemplate {
                 case "T":
                     path += "T"
                     break
+                case "custom":
+                    path += ` ${point.custom} `
+                    break
                 default:
                     throw new Error(`SVGPath.update(): Unexpected Point Type '${point.type}'`)
+                }
+    
+                if ( point.type != "custom" ) path += ` ${point.x} ${point.y} `
             }
-
-            path += ` ${point.x} ${point.y} `
+    
+            this.set("d", path)
+            return this
         }
-
-        this.set("d", path)
-        return this
     }
-}
+    
+
 
 
 class SVGLine extends SVGTemplate {
