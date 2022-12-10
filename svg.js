@@ -69,6 +69,14 @@ class SVGTemplate {
         "stroke": "black",
         "stroke-linecap": "round",
     }}
+
+    /** @returns {Object.<string,string>} */
+    static get fillDefaults() { return {
+        "fill": "black",
+        "stroke-width": "10",
+        "stroke": "none",
+        "stroke-linecap": "round",
+    }}
 }
 
 class SVGArc extends SVGTemplate {
@@ -89,7 +97,6 @@ class SVGArc extends SVGTemplate {
      * Sets the center position of the arc.
      * @param {number} x - The x coordinate of the center.
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
-     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
      */
     center( x,y ) {
         this.centerPosition = [ x, y ?? x ]
@@ -100,7 +107,6 @@ class SVGArc extends SVGTemplate {
      * Sets the start and end angles of the arc.
      * @param {number} startAngle - The starting angle of the arc, in radians.
      * @param {number} endAngle - The ending angle of the arc, in radians.
-     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
      */
     angles( startAngle, endAngle ) {
         this.startAngle = startAngle
@@ -112,7 +118,6 @@ class SVGArc extends SVGTemplate {
      * Sets the start and end angles of the arc, given as values between 0 and 1.
      * @param {number} startAngle - The starting angle of the arc, as a value between 0 and 1.
      * @param {number} endAngle - The ending angle of the arc, as a value between 0 and 1.
-     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
      */
     anglesNormalized( startAngle, endAngle ) {
         this.startAngle = startAngle * Math.PI * 2
@@ -123,7 +128,6 @@ class SVGArc extends SVGTemplate {
     /** 
      * Sets the radius of the circular arc.
      * @param {number} radius - The radius of the circular arc.
-     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
      */
     radius( radius ) {
         this.circularRadius = radius
@@ -133,7 +137,6 @@ class SVGArc extends SVGTemplate {
     /** 
      * Updates the arc to reflect any changes to its properties.
      * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
-     * @returns {SVGArc} - Returns the SVGArc object, to allow for method chaining.
      */
     update( millisecondsSinceInitialisation = Infinity ) {
         // If an update callback function has been set, call it.
