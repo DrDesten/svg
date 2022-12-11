@@ -254,44 +254,74 @@ class SVGPath extends SVGTemplate {
                     path += `L ${point.x} ${point.y} `
                     break
                 case "cubic bezier":
-                    const lastPoint = this.pathPoints[i-1]
-                    const nextPoint = this.pathPoints[i+1]
-
-                    /* const controlPoint1GuideVector = {
-                        x: nextPoint.x - lastPoint.x,
-                        y: nextPoint.y - lastPoint.y
+                    const points = {
+                        "-2": this.pathPoints[i-2], // May be undefined
+                        "-1": this.pathPoints[i-1], // Always available
+                        "0" : this.pathPoints[i],   // Always available
+                        "1" : this.pathPoints[i+1], // May be undefined
                     }
-                    const controlPoint2GuideVector = {
-                        x: nextPoint.x - lastPoint.x,
-                        y: nextPoint.y - lastPoint.y
-                    } */
+
+                    // Only two available points, draw a line
+                    if ( !(points[-2] || points[1]) ) { 
+                        path += `L ${point.x} ${point.y} `
+                        break
+                    }
+
+                    let controlPoint1            = { x: NaN, y: NaN }
+                    let controlPoint1GuideVector = { x: NaN, y: NaN }
+                    let controlPoint2            = { x: NaN, y: NaN }
+                    let controlPoint2GuideVector = { x: NaN, y: NaN }
+
+                    const dist = distance(points[-1], points[0])
+
+                    // previous to last point is available, calculate control point 1
+                    if ( points[-2] ) {
+                        controlPoint1GuideVector = { 
+                            x: points[0].x - points[-2].x, 
+                            y: points[0].y - points[-2].y 
+                        }
+                        controlPoint1GuideVector = setLength(controlPoint1GuideVector, dist / 3)
+                        controlPoint1 = { 
+                            x: points[-1].x + controlPoint1GuideVector.x,
+                            y: points[-1].y + controlPoint1GuideVector.y
+                        }
+                    }
+
+                    // next point is available, calculate contol point 2
+                    if ( points[1] ) {
+                        controlPoint2GuideVector = { 
+                            x: points[1].x - points[-1].x, 
+                            y: points[1].y - points[-1].y 
+                        }
+                        controlPoint2GuideVector = setLength(controlPoint2GuideVector, dist / 3)
+                        controlPoint2 = { 
+                            x: points[0].x - controlPoint2GuideVector.x,
+                            y: points[0].y - controlPoint2GuideVector.y
+                        }
+                    }
+
                     
-                    // Calculate control point coordinates
-                    if ( i == 1 || this.pathPoints[i-1].type != "cubic bezier") { // We have to calculate all control points
-
-                        if (nextPoint) {
-                            let difference = [ nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y ]
-                            let handle     = [ difference[0] / 4, difference[1] / 4 ]
-                            let controlPoint2 = [ point.x - handle[0], point.y - handle[1] ]
-                            let controlPoint1 = [ lastPoint.x + (controlPoint2[0] - lastPoint.x) / 4, lastPoint.y + (controlPoint2[1] - lastPoint.y) / 4 ]
-                            path += `C ${controlPoint1[0]} ${controlPoint1[1]} `
-                                  + `${controlPoint2[0]} ${controlPoint2[1]} `
-                                  + `${point.x} ${point.y} `
-                        } else {
-                            path += `L ${point.x} ${point.y} `
+                    // previous to last point is unavailable, calculate control point 1 using control point 2
+                    // early return when both are undefined ensures that one of them is defined
+                    if ( !points[-2] ) {
+                        controlPoint1 = {
+                            x: points[-1].x + ( ( points[0].x - controlPoint2GuideVector.x * 2 ) - points[-1].x ) / 2,
+                            y: points[-1].y + ( ( points[0].y - controlPoint2GuideVector.y * 2 ) - points[-1].y ) / 2,
                         }
+                    } 
 
-                    } else { // We only have to calculate the next control point
-
-                        if (nextPoint) {
-                            let difference = [ nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y ]
-                            let handle     = [ difference[0] / 4, difference[1] / 4 ]
-                            let controlPoint2 = [ point.x - handle[0], point.y - handle[1] ]
-                            path += `S ${controlPoint2[0]} ${controlPoint2[1]} ${point.x} ${point.y} `
-                        } else {
-                            path += `L ${point.x} ${point.y} `
+                    // next point is unavailable, calculate contol point 2 using control point 1
+                    // early return when both are undefined ensures one of them is
+                    if ( !points[1] ) {
+                        controlPoint2 = {
+                            x: points[0].x + ( ( points[-1].x + controlPoint1GuideVector.x * 2 ) - points[0].x ) / 2,
+                            y: points[0].y + ( ( points[-1].y + controlPoint1GuideVector.y * 2 ) - points[0].y ) / 2,
                         }
                     }
+                    
+                    path += `C ${controlPoint1.x} ${controlPoint1.y} `
+                          + `${controlPoint2.x} ${controlPoint2.y} `
+                          + `${point.x} ${point.y} `
                     break
                 case "quadratic bezier":
                     path += `T ${point.x} ${point.y} `
@@ -307,6 +337,22 @@ class SVGPath extends SVGTemplate {
     
         this.set("d", path)
         return this
+
+        function length( vector ) {
+            return Math.sqrt( vector.x * vector.x + vector.y * vector.y )
+        }
+        function distance( vector1, vector2 ) {
+            const tmp = [ vector1.x - vector2.x, vector1.y - vector2.y ]
+            return Math.sqrt( tmp[0] * tmp[0] + tmp[1] * tmp[1] )
+        }
+        function normalize( vector ) {
+            const invLength = 1 / length(vector)
+            return { x: tmp[0] * invLength, y: vector.y * invLength }
+        }
+        function setLength( vector, targetLength ) {
+            const scale = targetLength / length(vector)
+            return { x: vector.x * scale, y: vector.y * scale }
+        }
     }
 }
 
