@@ -305,8 +305,8 @@ class SVGPath extends SVGTemplate {
                     // early return when both are undefined ensures that one of them is defined
                     if ( !points[-2] ) {
                         controlPoint1 = {
-                            x: points[-1].x + ( ( points[0].x - controlPoint2GuideVector.x * 2 ) - points[-1].x ) / 2,
-                            y: points[-1].y + ( ( points[0].y - controlPoint2GuideVector.y * 2 ) - points[-1].y ) / 2,
+                            x: points[-1].x + ( ( points[0].x - controlPoint2GuideVector.x * 1.5 ) - points[-1].x ) / 3,
+                            y: points[-1].y + ( ( points[0].y - controlPoint2GuideVector.y * 1.5 ) - points[-1].y ) / 3,
                         }
                     } 
 
@@ -314,8 +314,8 @@ class SVGPath extends SVGTemplate {
                     // early return when both are undefined ensures one of them is
                     if ( !points[1] ) {
                         controlPoint2 = {
-                            x: points[0].x + ( ( points[-1].x + controlPoint1GuideVector.x * 2 ) - points[0].x ) / 2,
-                            y: points[0].y + ( ( points[-1].y + controlPoint1GuideVector.y * 2 ) - points[0].y ) / 2,
+                            x: points[0].x + ( ( points[-1].x + controlPoint1GuideVector.x * 1.5 ) - points[0].x ) / 3,
+                            y: points[0].y + ( ( points[-1].y + controlPoint1GuideVector.y * 1.5 ) - points[0].y ) / 3,
                         }
                     }
                     
