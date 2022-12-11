@@ -85,9 +85,13 @@ class SVGArc extends SVGTemplate {
         super( "path" )
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
+        /** @private */
         this.centerPosition = [0,0]
+        /** @private */
         this.startAngle = 0
+        /** @private */
         this.endAngle = 0
+        /** @private */
         this.circularRadius = 0
     }
 
@@ -183,9 +187,9 @@ class SVGPath extends SVGTemplate {
         super( "path" )
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
-        /** @type {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'custom'} */
+        /** @private @type {'line'|'cubic bezier'|'quadratic bezier'|'custom'} */
         this.pathMode   = "line"
-        /** @type {{type: string, x: number, y:number, custom?:string}[]} */
+        /** @private @type {{type: 'line'|'cubic bezier'|'quadratic bezier'|'close'|'custom', x: number, y:number, custom?:string}[]} */
         this.pathPoints = []
     }
 
@@ -193,7 +197,21 @@ class SVGPath extends SVGTemplate {
      * Sets the path mode, which determines how subsequent points in the path will be connected.
      * @param {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'custom'} mode - The path mode to set.
      */
-    mode( mode ) { return this.pathMode = mode, this }
+    mode( mode ) { return this.pathMode = {
+        "L": "line",
+        "line": "line",
+
+        "C": "cubic bezier",
+        "S": "cubic bezier",
+        "bezier": "cubic bezier",
+        "cubic bezier": "cubic bezier",
+        
+        "Q": "quadratic bezier",
+        "T": "quadratic bezier",
+        "quadratic bezier": "quadratic bezier",
+
+        "custom": "custom",
+    }[mode], this }
 
     /** 
      * Adds a point to the path.
@@ -212,7 +230,7 @@ class SVGPath extends SVGTemplate {
     /**
      * Closes the path.
      */
-    close() { return this.pathPoints.push({ type: "close" }), this }
+    close() { return this.pathPoints.push({ type: "close", x: this.pathPoints[0]?.x, y: this.pathPoints[0]?.y }), this }
 
     // Animation ///////////////////////////////////////////////
 
@@ -225,7 +243,7 @@ class SVGPath extends SVGTemplate {
 
         let path = ""
         for ( const [i, point] of this.pathPoints.entries() ) {
-            if ( point.type == "close" || point.type == "Z" ) { 
+            if ( point.type == "close" ) { 
                 path += "Z"
                 break 
             }
@@ -233,22 +251,49 @@ class SVGPath extends SVGTemplate {
             if ( i == 0 ) path += `M ${point.x} ${point.y} `
             else switch ( point.type ) {
                 case "line":
-                case "L":
                     path += `L ${point.x} ${point.y} `
                     break
-                case "bezier":
                 case "cubic bezier":
-                case "C":
-                case "S":
+                    const lastPoint = this.pathPoints[i-1]
+                    const nextPoint = this.pathPoints[i+1]
+
+                    /* const controlPoint1GuideVector = {
+                        x: nextPoint.x - lastPoint.x,
+                        y: nextPoint.y - lastPoint.y
+                    }
+                    const controlPoint2GuideVector = {
+                        x: nextPoint.x - lastPoint.x,
+                        y: nextPoint.y - lastPoint.y
+                    } */
+                    
                     // Calculate control point coordinates
-                    const previousPoint = this.pathPoints[i-1]
-                    const controlPointX = previousPoint.x + (point.x - previousPoint.x) / 2
-                    const controlPointY = previousPoint.y + (point.y - previousPoint.y) / 2
-                    path += `S ${controlPointX} ${controlPointY} ${point.x} ${point.y} `
+                    if ( i == 1 || this.pathPoints[i-1].type != "cubic bezier") { // We have to calculate all control points
+
+                        if (nextPoint) {
+                            let difference = [ nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y ]
+                            let handle     = [ difference[0] / 4, difference[1] / 4 ]
+                            let controlPoint2 = [ point.x - handle[0], point.y - handle[1] ]
+                            let controlPoint1 = [ lastPoint.x + (controlPoint2[0] - lastPoint.x) / 4, lastPoint.y + (controlPoint2[1] - lastPoint.y) / 4 ]
+                            path += `C ${controlPoint1[0]} ${controlPoint1[1]} `
+                                  + `${controlPoint2[0]} ${controlPoint2[1]} `
+                                  + `${point.x} ${point.y} `
+                        } else {
+                            path += `L ${point.x} ${point.y} `
+                        }
+
+                    } else { // We only have to calculate the next control point
+
+                        if (nextPoint) {
+                            let difference = [ nextPoint.x - lastPoint.x, nextPoint.y - lastPoint.y ]
+                            let handle     = [ difference[0] / 4, difference[1] / 4 ]
+                            let controlPoint2 = [ point.x - handle[0], point.y - handle[1] ]
+                            path += `S ${controlPoint2[0]} ${controlPoint2[1]} ${point.x} ${point.y} `
+                        } else {
+                            path += `L ${point.x} ${point.y} `
+                        }
+                    }
                     break
                 case "quadratic bezier":
-                case "Q":
-                case "T":
                     path += `T ${point.x} ${point.y} `
                     break
                 case "custom":
@@ -272,13 +317,16 @@ class SVGLine extends SVGTemplate {
         super( "line" )
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
+        /** @private */
         this.coordinateMode = "point"
+        /** @private */
         this.angleMode = {
             center: [0,0],
             angle:  0,
             startRadius: 0,
             endRadius:   0,
         }
+        /** @private */
         this.pointMode = {
             start: [0,0],
             end:   [0,0],
@@ -335,7 +383,9 @@ class SVGCircle extends SVGTemplate {
         super( "circle" )
         this.setDefaults(SVGTemplate.fillDefaults, opts)
 
+        /** @private */
         this.centerPosition = [0,0]
+        /** @private */
         this.circularRadius = 0
     }
 
@@ -371,7 +421,9 @@ class SVGEllipse extends SVGTemplate {
         super( "ellipse" )
         this.setDefaults(SVGTemplate.fillDefaults, opts)
 
+        /** @private */
         this.centerPosition = [0,0]
+        /** @private */
         this.ellipseRadii   = [0,0]
     }
 
@@ -383,8 +435,8 @@ class SVGEllipse extends SVGTemplate {
     center( x, y ) { return this.centerPosition = [ x, y ?? x ], this }
     /** 
      * Sets the radius of the circle.
-     * @param {number} r1 - The radius of the circle.
-     * @param {number} r2 - The radius of the circle.
+     * @param {number} rx - The x-radius of the ellipse.
+     * @param {number=} ry - The y-radius of the ellipse. If not provided, the x-radius is used for both x and y.
      */
     radius( rx, ry ) { return this.ellipseRadii = [ rx, ry ?? rx ], this }
 
@@ -396,8 +448,11 @@ class SVGEllipse extends SVGTemplate {
         // If an update callback function has been set, call it.
         if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
-        // Update the SVG circle element to reflect the current center and radius values.
-        this.set("cx", this.centerPosition[0]).set("cy", this.centerPosition[1]).set("r", this.circularRadius)
+        // Update the SVG ellipse element to reflect the current center and radius values.
+        this.set("cx", this.centerPosition[0])
+            .set("cy", this.centerPosition[1])
+            .set("rx", this.ellipseRadii[0])
+            .set("ry", this.ellipseRadii[1])
         return this
     }
 }
@@ -408,9 +463,13 @@ class SVGRectangle extends SVGTemplate {
         super( "rect" )
         this.setDefaults(SVGTemplate.fillDefaults, opts)
         
+        /** @private */
         this.coordinateMode = "corner"
+        /** @private */
         this.rectangleDimensions = [0,0]
+        /** @private */
         this.rectanglePosition = [0,0]
+        /** @private */
         this.borderRadii = [0,0]
     }
 
