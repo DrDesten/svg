@@ -124,11 +124,42 @@ class SVGTemplate {
         },
 
         controlPoints( lastlast, last, current, next, guideDistance ) {
+            if ( !last || !current )  throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points")
+            if ( !lastlast && !next ) throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'lastlast' and 'next' are undefined. At least one is required to calculate control points")
+            
             guideDistance ??= VectorMath.distance(last, current)
-            return [
-                this.controlPoint1(lastlast, last, current, guideDistance),
-                this.controlPoint2(last, current, next, guideDistance),
-            ]
+
+            if ( lastlast && next ) { // Both are defined, simply calculate control points
+                return [
+                    this.controlPoint1(lastlast, last, current, guideDistance),
+                    this.controlPoint2(last, current, next, guideDistance),
+                ]
+            }
+
+            if ( next ) { // 'lastlast' is not defined
+                const cp2 = this.controlPoint2(last, current, next, guideDistance)
+                const cp1 = {
+                    point: {
+                        x: last.x + ( ( current.x + cp2.guideVector.x * 1.5 ) - last.x ) / 3,
+                        y: last.y + ( ( current.y + cp2.guideVector.y * 1.5 ) - last.y ) / 3,
+                    },
+                    guideVector: undefined
+                }
+                return [ cp1, cp2 ]
+            }
+
+            if ( lastlast ) { // 'next' is not defined
+                const cp1 = this.controlPoint1(lastlast, last, current, guideDistance)
+                const cp2 = {
+                    point: {
+                        x: current.x + ( ( last.x + cp1.guideVector.x * 1.5 ) - current.x ) / 3,
+                        y: current.y + ( ( last.y + cp1.guideVector.y * 1.5 ) - current.y ) / 3,
+                    },
+                    guideVector: undefined
+                }
+                return [ cp1, cp2 ]
+            }
+
         },
 
     }}
@@ -358,28 +389,16 @@ class SVGPath extends SVGTemplate {
 
                     // previous to last point is available, calculate control point 1
                     if ( points[-2] ) {
-                        controlPoint1GuideVector = { 
-                            x: points[0].x - points[-2].x, 
-                            y: points[0].y - points[-2].y 
-                        }
-                        controlPoint1GuideVector = VectorMath.setLength(controlPoint1GuideVector, dist / 3)
-                        controlPoint1 = { 
-                            x: points[-1].x + controlPoint1GuideVector.x,
-                            y: points[-1].y + controlPoint1GuideVector.y
-                        }
+                        const cp = SVGTemplate.cubicBezier.controlPoint1(points[-2], points[-1], points[0], dist)
+                        controlPoint1GuideVector = cp.guideVector
+                        controlPoint1 = cp.point
                     }
 
                     // next point is available, calculate contol point 2
                     if ( points[1] ) {
-                        controlPoint2GuideVector = { 
-                            x: points[1].x - points[-1].x, 
-                            y: points[1].y - points[-1].y 
-                        }
-                        controlPoint2GuideVector = VectorMath.setLength(controlPoint2GuideVector, dist / 3)
-                        controlPoint2 = { 
-                            x: points[0].x - controlPoint2GuideVector.x,
-                            y: points[0].y - controlPoint2GuideVector.y
-                        }
+                        const cp = SVGTemplate.cubicBezier.controlPoint2(points[-1], points[0], points[1], dist)
+                        controlPoint2GuideVector = cp.guideVector
+                        controlPoint2 = cp.point
                     }
 
                     
@@ -387,8 +406,8 @@ class SVGPath extends SVGTemplate {
                     // early return when both are undefined ensures that one of them is defined
                     if ( !points[-2] ) {
                         controlPoint1 = {
-                            x: points[-1].x + ( ( points[0].x - controlPoint2GuideVector.x * 1.5 ) - points[-1].x ) / 3,
-                            y: points[-1].y + ( ( points[0].y - controlPoint2GuideVector.y * 1.5 ) - points[-1].y ) / 3,
+                            x: points[-1].x + ( ( points[0].x + controlPoint2GuideVector.x * 1.5 ) - points[-1].x ) / 3,
+                            y: points[-1].y + ( ( points[0].y + controlPoint2GuideVector.y * 1.5 ) - points[-1].y ) / 3,
                         }
                     } 
 
