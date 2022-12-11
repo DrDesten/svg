@@ -1,0 +1,20 @@
+body {
+    background-color: white;
+}
+
+.center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+#waterworld {
+    width: min(80vh, 80vw);
+    height: min(80vh, 80vw);
+
+    border-radius: 50%;
+
+    filter: drop-shadow(0 0 4em rgb(189, 189, 217));
+}
+
