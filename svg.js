@@ -44,7 +44,7 @@ class SVGTemplate {
     // Static
     ///////////////////////////////////////////////////////////////////
 
-    // Coordinate Maniputaion /////////////////////////////////
+    // Coordinate Maniputaion ///////////////////////////////
 
     /** 
      * Returns a point on a circle given an angle, radius and center  
@@ -59,6 +59,29 @@ class SVGTemplate {
             asArray: function() { return [ this.x, this.y ] }
         }
     }
+
+    // Curves ////////////////////////////////////////////////
+
+    static cubicBezier( ) {
+
+
+        function length( vector ) {
+            return Math.sqrt( vector.x * vector.x + vector.y * vector.y )
+        }
+        function distance( vector1, vector2 ) {
+            const tmp = [ vector1.x - vector2.x, vector1.y - vector2.y ]
+            return Math.sqrt( tmp[0] * tmp[0] + tmp[1] * tmp[1] )
+        }
+        function normalize( vector ) {
+            const invLength = 1 / length(vector)
+            return { x: tmp[0] * invLength, y: vector.y * invLength }
+        }
+        function setLength( vector, targetLength ) {
+            const scale = targetLength / length(vector)
+            return { x: vector.x * scale, y: vector.y * scale }
+        }
+    }
+
 
     // Defaults //////////////////////////////////////////////
 
@@ -191,6 +214,8 @@ class SVGPath extends SVGTemplate {
         this.pathMode   = "line"
         /** @private @type {{type: 'line'|'cubic bezier'|'quadratic bezier'|'close'|'custom', x: number, y:number, custom?:string}[]} */
         this.pathPoints = []
+        /** @private @type {boolean} */
+        this.closed     = false
     }
 
     /**
@@ -230,7 +255,11 @@ class SVGPath extends SVGTemplate {
     /**
      * Closes the path.
      */
-    close() { return this.pathPoints.push({ type: "close", x: this.pathPoints[0]?.x, y: this.pathPoints[0]?.y }), this }
+    close() {
+        this.pathPoints.push({ type: "close", x: this.pathPoints[0]?.x, y: this.pathPoints[0]?.y })
+        this.closed = true
+        return this
+    }
 
     // Animation ///////////////////////////////////////////////
 
@@ -243,7 +272,7 @@ class SVGPath extends SVGTemplate {
 
         let path = ""
         for ( const [i, point] of this.pathPoints.entries() ) {
-            if ( point.type == "close" ) { 
+            if ( point.type == "close" ) {
                 path += "Z"
                 break 
             }
@@ -255,7 +284,9 @@ class SVGPath extends SVGTemplate {
                     break
                 case "cubic bezier":
                     const points = {
-                        "-2": this.pathPoints[i-2], // May be undefined
+                        // If the path is closed and this is the first curve, use last point as previous to first
+                        // last point is at index '-2' since the 'close' tag is in the last place
+                        "-2": this.closed && i == 1 ? this.pathPoints[this.pathPoints.length - 2] : this.pathPoints[i-2], // May be undefined 
                         "-1": this.pathPoints[i-1], // Always available
                         "0" : this.pathPoints[i],   // Always available
                         "1" : this.pathPoints[i+1], // May be undefined
@@ -319,6 +350,19 @@ class SVGPath extends SVGTemplate {
                         }
                     }
                     
+                    /* console.log(
+                        points,
+                        "Control Point 1\n",
+                        controlPoint1,
+                        controlPoint1GuideVector,
+                        "\nControl Point 2\n",
+                        controlPoint2,
+                        controlPoint2GuideVector,
+                        "\nPoint\n",
+                        point,
+                        dist,
+                    ) */
+
                     path += `C ${controlPoint1.x} ${controlPoint1.y} `
                           + `${controlPoint2.x} ${controlPoint2.y} `
                           + `${point.x} ${point.y} `
