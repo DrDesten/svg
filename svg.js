@@ -160,6 +160,8 @@ class SVGTemplate {
                 return [ cp1, cp2 ]
             }
 
+            throw new Error("SVGTeplate.cubicBezier.controlPoints(): What the actual fuck?")
+
         },
 
     }}
@@ -380,61 +382,10 @@ class SVGPath extends SVGTemplate {
                         break
                     }
 
-                    let controlPoint1            = { x: NaN, y: NaN }
-                    let controlPoint1GuideVector = { x: NaN, y: NaN }
-                    let controlPoint2            = { x: NaN, y: NaN }
-                    let controlPoint2GuideVector = { x: NaN, y: NaN }
+                    const controlPoints = SVGTemplate.cubicBezier.controlPoints(points[-2], points[-1], points[0], points[1])
 
-                    const dist = VectorMath.distance(points[-1], points[0])
-
-                    // previous to last point is available, calculate control point 1
-                    if ( points[-2] ) {
-                        const cp = SVGTemplate.cubicBezier.controlPoint1(points[-2], points[-1], points[0], dist)
-                        controlPoint1GuideVector = cp.guideVector
-                        controlPoint1 = cp.point
-                    }
-
-                    // next point is available, calculate contol point 2
-                    if ( points[1] ) {
-                        const cp = SVGTemplate.cubicBezier.controlPoint2(points[-1], points[0], points[1], dist)
-                        controlPoint2GuideVector = cp.guideVector
-                        controlPoint2 = cp.point
-                    }
-
-                    
-                    // previous to last point is unavailable, calculate control point 1 using control point 2
-                    // early return when both are undefined ensures that one of them is defined
-                    if ( !points[-2] ) {
-                        controlPoint1 = {
-                            x: points[-1].x + ( ( points[0].x + controlPoint2GuideVector.x * 1.5 ) - points[-1].x ) / 3,
-                            y: points[-1].y + ( ( points[0].y + controlPoint2GuideVector.y * 1.5 ) - points[-1].y ) / 3,
-                        }
-                    } 
-
-                    // next point is unavailable, calculate contol point 2 using control point 1
-                    // early return when both are undefined ensures one of them is
-                    if ( !points[1] ) {
-                        controlPoint2 = {
-                            x: points[0].x + ( ( points[-1].x + controlPoint1GuideVector.x * 1.5 ) - points[0].x ) / 3,
-                            y: points[0].y + ( ( points[-1].y + controlPoint1GuideVector.y * 1.5 ) - points[0].y ) / 3,
-                        }
-                    }
-                    
-                    /* console.log(
-                        points,
-                        "Control Point 1\n",
-                        controlPoint1,
-                        controlPoint1GuideVector,
-                        "\nControl Point 2\n",
-                        controlPoint2,
-                        controlPoint2GuideVector,
-                        "\nPoint\n",
-                        point,
-                        dist,
-                    ) */
-
-                    path += `C ${controlPoint1.x} ${controlPoint1.y} `
-                          + `${controlPoint2.x} ${controlPoint2.y} `
+                    path += `C ${controlPoints[0].point.x} ${controlPoints[0].point.y} `
+                          + `${controlPoints[1].point.x} ${controlPoints[1].point.y} `
                           + `${point.x} ${point.y} `
                     break
                 case "quadratic bezier":
