@@ -7,16 +7,17 @@ let swirl = new SVG.path().mode("bezier")
     .point(30,20)
     .point(50,60)
     .point(50,40)
-    //.update()
+    .update()
 
 let square = new SVG.path().mode("bezier")
     .point(20,80)
     .point(80,80)
     .point(80,20)
     .point(20,20)
-    //.close()
+    .close()
     .update()
 
 globalSVG.add(
-    square
+    square,
+    //swirl
 )

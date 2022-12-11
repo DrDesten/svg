@@ -23,7 +23,11 @@ class SVGTemplate {
     /** @param {string} type */
     constructor( type ) {
         this.ele = document.createElementNS("http://www.w3.org/2000/svg", type)
+
+        /** @type {Object.<string,string>} */
         this.attributes = {}
+        /** @type {Object.<string,(string|number)[]>} */
+        this.transformAttributes = {}
     }
     /** @param {string} attribute @param {string} value */
     set( attribute, value ) { return this.ele.setAttribute( attribute, value ), this.attributes[attribute] = value, this }
@@ -60,6 +64,25 @@ class SVGTemplate {
     /** @param {number} opacity */
     opacity( opacity ) { return this.set("opacity", opacity), this }
 
+    applyTransforms() {
+        let transformProperty = ""
+        for ( const transform in this.transformAttributes ) {
+            transformProperty += ` ${transform}(${this.transformAttributes[transform].join(",")}) `
+        }
+        this.set("transform", transformProperty)
+        return this
+    }
+
+    scale( x, y ) {
+        this.transformAttributes.scale = [ x, y ?? x ]
+        this.applyTransforms()
+        return this
+    }
+
+    rotate( angle ) {
+        this.transformAttributes.rotate = [ angle ]
+        return this.applyTransforms()
+    }
 
     ///////////////////////////////////////////////////////////////////
     // Static
@@ -77,7 +100,7 @@ class SVGTemplate {
         return { 
             x: Math.sin(angle) * radius + center[0] ?? center.x, 
             y: Math.cos(angle) * radius + center[1] ?? center.y,
-            asArray: function() { return [ this.x, this.y ] }
+            asArray() { return [ this.x, this.y ] }
         }
     }
 
@@ -356,13 +379,31 @@ class SVGPath extends SVGTemplate {
 
         let path = ""
         for ( const [i, point] of this.pathPoints.entries() ) {
+
+            if ( i == 0 ) {
+                path += `M ${point.x} ${point.y} `
+                continue
+            }
+
             if ( point.type == "close" ) {
-                path += "Z"
+                const lastPoint = this.pathPoints[i-1]
+                if (lastPoint.type != "cubic bezier") {
+                    path += "Z "
+                } else {
+                    const points = {
+                        // Set next point to be the first to close the path smoothly
+                        "-2": this.pathPoints[i-2], // Undefined only when Path is a single point
+                        "-1": this.pathPoints[i-1], // Always available
+                        "0" : this.pathPoints[0],   // Always available
+                        "1" : this.pathPoints[1],   // Always available
+                    }
+                    const controlPoints = SVGTemplate.cubicBezier.controlPoints(points[-2], points[-1], points[0], points[1])
+                    path += `C ${controlPoints[0].point.x} ${controlPoints[0].point.y} ${controlPoints[1].point.x} ${controlPoints[1].point.y} ${point.x} ${point.y} Z `
+                }
                 break 
             }
 
-            if ( i == 0 ) path += `M ${point.x} ${point.y} `
-            else switch ( point.type ) {
+            switch ( point.type ) {
                 case "line":
                     path += `L ${point.x} ${point.y} `
                     break

@@ -1,6 +1,6 @@
 const globalSVG = new SVG( "#waterworld" )
 
-const numSegments = 50
+const numSegments = 200
 const radius = 40
 const centerX = 50
 const centerY = 50
@@ -9,8 +9,8 @@ const centerY = 50
 const paths = []
 
 // Create the paths
-for ( let i = 0; i < 6; i++ ) {
-    const path = new SVG.path().mode("bezier").width(5.125)
+for ( let i = 0; i < 7; i++ ) {
+    const path = new SVG.path().width(4.625)
 
     // Add the first point of the circle
     path.point(centerX + radius, centerY)
@@ -34,8 +34,8 @@ for ( let i = 0; i < 6; i++ ) {
     path.onUpdate((path, time) => {
         path.pathPoints = path.pathPoints.map((point, o) => {
             const angle = (2 * Math.PI / numSegments) * o
-            point.x = centerX + (radius - i * 5 + (Math.sin(time/1000 * (i + 1) + angle * 5) * radius * 0.1)) * Math.cos(angle) 
-            point.y = centerY + (radius - i * 5 + (Math.sin(time/1000 * (i + 1) + angle * 5) * radius * 0.1)) * Math.sin(angle)
+            point.x = centerX + (radius - i * 4.5 + (Math.sin(time/1000 * (i + 1) + angle * 5) * radius * 0.1)) * Math.cos(angle) 
+            point.y = centerY + (radius - i * 4.5 + (Math.sin(time/1000 * (i + 1) + angle * 5) * radius * 0.1)) * Math.sin(angle)
             return point
         })
     })
