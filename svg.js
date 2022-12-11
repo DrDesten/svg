@@ -1,3 +1,24 @@
+class VectorMath {
+
+    static length( vector ) {
+        return Math.sqrt( vector.x * vector.x + vector.y * vector.y )
+    }
+    static distance( vector1, vector2 ) {
+        const tmp = [ vector1.x - vector2.x, vector1.y - vector2.y ]
+        return Math.sqrt( tmp[0] * tmp[0] + tmp[1] * tmp[1] )
+    }
+
+    static normalize( vector ) {
+        const scale = 1 / this.length(vector)
+        return { x: vector.x * scale, y: vector.y * scale }
+    }
+    static setLength( vector, targetLength ) {
+        const scale = targetLength / this.length(vector)
+        return { x: vector.x * scale, y: vector.y * scale }
+    }
+
+}
+
 class SVGTemplate {
     /** @param {string} type */
     constructor( type ) {
@@ -62,25 +83,55 @@ class SVGTemplate {
 
     // Curves ////////////////////////////////////////////////
 
-    static cubicBezier( ) {
+    static get cubicBezier() { return {
 
+        controlPoint1( lastlast, last, current, guideDistance ) {
+            guideDistance ??= VectorMath.distance(last, current)
 
-        function length( vector ) {
-            return Math.sqrt( vector.x * vector.x + vector.y * vector.y )
-        }
-        function distance( vector1, vector2 ) {
-            const tmp = [ vector1.x - vector2.x, vector1.y - vector2.y ]
-            return Math.sqrt( tmp[0] * tmp[0] + tmp[1] * tmp[1] )
-        }
-        function normalize( vector ) {
-            const invLength = 1 / length(vector)
-            return { x: tmp[0] * invLength, y: vector.y * invLength }
-        }
-        function setLength( vector, targetLength ) {
-            const scale = targetLength / length(vector)
-            return { x: vector.x * scale, y: vector.y * scale }
-        }
-    }
+            const guideVector = VectorMath.setLength({ 
+                x: current.x - lastlast.x, 
+                y: current.y - lastlast.y 
+            }, guideDistance / 3)
+
+            const controlPoint = { 
+                x: last.x + guideVector.x,
+                y: last.y + guideVector.y
+            }
+
+            return {
+                point: controlPoint,
+                guideVector: guideVector
+            }
+        },
+
+        controlPoint2( last, current, next, guideDistance ) {
+            guideDistance ??= VectorMath.distance(last, current)
+
+            const guideVector = VectorMath.setLength({ 
+                x: last.x - next.x, 
+                y: last.y - next.y 
+            }, guideDistance / 3)
+
+            const controlPoint = { 
+                x: current.x + guideVector.x,
+                y: current.y + guideVector.y
+            }
+
+            return {
+                point: controlPoint,
+                guideVector: guideVector
+            }
+        },
+
+        controlPoints( lastlast, last, current, next, guideDistance ) {
+            guideDistance ??= VectorMath.distance(last, current)
+            return [
+                this.controlPoint1(lastlast, last, current, guideDistance),
+                this.controlPoint2(last, current, next, guideDistance),
+            ]
+        },
+
+    }}
 
 
     // Defaults //////////////////////////////////////////////
@@ -303,7 +354,7 @@ class SVGPath extends SVGTemplate {
                     let controlPoint2            = { x: NaN, y: NaN }
                     let controlPoint2GuideVector = { x: NaN, y: NaN }
 
-                    const dist = distance(points[-1], points[0])
+                    const dist = VectorMath.distance(points[-1], points[0])
 
                     // previous to last point is available, calculate control point 1
                     if ( points[-2] ) {
@@ -311,7 +362,7 @@ class SVGPath extends SVGTemplate {
                             x: points[0].x - points[-2].x, 
                             y: points[0].y - points[-2].y 
                         }
-                        controlPoint1GuideVector = setLength(controlPoint1GuideVector, dist / 3)
+                        controlPoint1GuideVector = VectorMath.setLength(controlPoint1GuideVector, dist / 3)
                         controlPoint1 = { 
                             x: points[-1].x + controlPoint1GuideVector.x,
                             y: points[-1].y + controlPoint1GuideVector.y
@@ -324,7 +375,7 @@ class SVGPath extends SVGTemplate {
                             x: points[1].x - points[-1].x, 
                             y: points[1].y - points[-1].y 
                         }
-                        controlPoint2GuideVector = setLength(controlPoint2GuideVector, dist / 3)
+                        controlPoint2GuideVector = VectorMath.setLength(controlPoint2GuideVector, dist / 3)
                         controlPoint2 = { 
                             x: points[0].x - controlPoint2GuideVector.x,
                             y: points[0].y - controlPoint2GuideVector.y
@@ -381,22 +432,6 @@ class SVGPath extends SVGTemplate {
     
         this.set("d", path)
         return this
-
-        function length( vector ) {
-            return Math.sqrt( vector.x * vector.x + vector.y * vector.y )
-        }
-        function distance( vector1, vector2 ) {
-            const tmp = [ vector1.x - vector2.x, vector1.y - vector2.y ]
-            return Math.sqrt( tmp[0] * tmp[0] + tmp[1] * tmp[1] )
-        }
-        function normalize( vector ) {
-            const invLength = 1 / length(vector)
-            return { x: tmp[0] * invLength, y: vector.y * invLength }
-        }
-        function setLength( vector, targetLength ) {
-            const scale = targetLength / length(vector)
-            return { x: vector.x * scale, y: vector.y * scale }
-        }
     }
 }
 
