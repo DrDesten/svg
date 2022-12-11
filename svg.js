@@ -728,6 +728,7 @@ const SVG = Object.assign(
     SVGGlobal, {
     rect: SVGRectangle,
     circle: SVGCircle,
+    ellipse: SVGEllipse,
     line: SVGLine,
     path: SVGPath,
     arc: SVGArc,
