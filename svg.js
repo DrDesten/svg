@@ -61,9 +61,10 @@ class Vector {
      * @returns {Vector} The vector divided by the scalar or divided component-wise by the vector.
     */
     div(v) {
-        if (typeof v === 'number')
-            return inv = 1/v, new Vector(this.x * inv, this.y * inv)
-        else 
+        if (typeof v === 'number') {
+            const inv = 1 / v
+            return new Vector(this.x * inv, this.y * inv)
+        } else 
             return new Vector(this.x / v.x, this.y / v.y)
     }
 
@@ -150,16 +151,16 @@ class Vector {
     }
 
     /**
-
-    Divides a vector by a scalar or a vector.
-    @param {Vector} v The vector to divide.
-    @param {number|Vector} s The scalar or vector to divide the vector by.
-    @returns {Vector} The vector divided by the scalar or divided component-wise by the vector.
+     * Divides a vector by a scalar or a vector.
+     * @param {Vector} v The vector to divide.
+     * @param {number|Vector} s The scalar or vector to divide the vector by.
+     * @returns {Vector} The vector divided by the scalar or divided component-wise by the vector.
     */
     static div(v, s) {
-        if (typeof s === 'number')
-            return inv = 1 / s, new Vector(v.x * inv, v.y * inv)
-        else
+        if (typeof s === 'number') {
+            const inv = 1 / s
+            return new Vector(v.x * inv, v.y * inv)
+        } else 
             return new Vector(v.x / s.x, v.y / s.y)
     }
 
@@ -299,46 +300,53 @@ class SVGTemplate {
     static get cubicBezier() {
         return {
 
+            /**
+             * Calculates the control point for a cubic Bezier curve.
+             * @param {Vector} lastlast The previous point before the last point.
+             * @param {Vector} last The last point.
+             * @param {Vector} current The current point.
+             * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
+             * @returns {{point: Vector, guideVector: Vector}} An object containing the calculated control point and the guide vector used to calculate it.
+            */
             controlPoint1(lastlast, last, current, guideDistance) {
-                guideDistance ??= Vector.distance(last, current)
-
-                const guideVector = Vector.setLength({
-                    x: current.x - lastlast.x,
-                    y: current.y - lastlast.y
-                }, guideDistance / 3)
-
-                const controlPoint = {
-                    x: last.x + guideVector.x,
-                    y: last.y + guideVector.y
-                }
-
+                guideDistance    ??= Vector.distance(last, current)
+                const guideVector  = Vector.setLength(Vector.sub(current, lastlast), guideDistance / 3)
+                const controlPoint = Vector.add(last, guideVector)
                 return {
                     point: controlPoint,
                     guideVector: guideVector
                 }
             },
 
+            /**
+             * Calculates the control point for a cubic Bezier curve.
+             * @param {Vector} last The last point.
+             * @param {Vector} current The current point.
+             * @param {Vector} next The next point.
+             * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
+             * @returns {{point: Vector, guideVector: Vector}} An object containing the calculated control point and the guide vector used to calculate it.
+            */
             controlPoint2(last, current, next, guideDistance) {
-                guideDistance ??= Vector.distance(last, current)
-
-                const guideVector = Vector.setLength({
-                    x: last.x - next.x,
-                    y: last.y - next.y
-                }, guideDistance / 3)
-
-                const controlPoint = {
-                    x: current.x + guideVector.x,
-                    y: current.y + guideVector.y
-                }
-
+                guideDistance    ??= Vector.distance(last, current)
+                const guideVector  = Vector.setLength(Vector.sub(last, next), guideDistance / 3)
+                const controlPoint = Vector.add(current, guideVector)
                 return {
                     point: controlPoint,
                     guideVector: guideVector
                 }
             },
 
+            /**
+             * Calculates the control points for a cubic Bezier curve.
+             * @param {Vector=} lastlast The previous point before the last point.
+             * @param {Vector}  last The last point.
+             * @param {Vector}  current The current point.
+             * @param {Vector=} next The next point.
+             * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
+             * @returns {Array<{point: Vector, guideVector: Vector}>} An array containing the two calculated control points and their corresponding guide vectors.
+            */
             controlPoints(lastlast, last, current, next, guideDistance) {
-                if (!last || !current) throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points")
+                if (!last || !current)  throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points")
                 if (!lastlast && !next) throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'lastlast' and 'next' are undefined. At least one is required to calculate control points")
 
                 guideDistance ??= Vector.distance(last, current)
@@ -353,10 +361,7 @@ class SVGTemplate {
                 if (next) { // 'lastlast' is not defined
                     const cp2 = this.controlPoint2(last, current, next, guideDistance)
                     const cp1 = {
-                        point: {
-                            x: last.x + ((current.x + cp2.guideVector.x * 1.5) - last.x) / 3,
-                            y: last.y + ((current.y + cp2.guideVector.y * 1.5) - last.y) / 3,
-                        },
+                        point: cp2.guideVector.mult(1.5).add(current).sub(last).div(3).add(last),
                         guideVector: undefined
                     }
                     return [cp1, cp2]
@@ -365,10 +370,7 @@ class SVGTemplate {
                 if (lastlast) { // 'next' is not defined
                     const cp1 = this.controlPoint1(lastlast, last, current, guideDistance)
                     const cp2 = {
-                        point: {
-                            x: current.x + ((last.x + cp1.guideVector.x * 1.5) - current.x) / 3,
-                            y: current.y + ((last.y + cp1.guideVector.y * 1.5) - current.y) / 3,
-                        },
+                        point: cp1.guideVector.mult(1.5).add(last).sub(current).div(3).add(current),
                         guideVector: undefined
                     }
                     return [cp1, cp2]
