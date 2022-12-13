@@ -1,12 +1,16 @@
 class Vector {
     /**
      * Constructs a new Vector instance with the specified x and y coordinates.
-     * @param {number} x The x coordinate of the vector.
-     * @param {number} y The y coordinate of the vector.
-     */
+     * @param {number|[number,number]|{x:number,y:number}} x The x coordinate of the vector, or an array or object containing the x and y coordinates.
+     * @param {number=} y                                    The y coordinate of the vector. This parameter is only used if x is a number.
+    */
     constructor(x, y) {
-        this.x = x
-        this.y = y
+        if (typeof x === 'number')
+            this.x = x, this.y = y
+        else if (Array.isArray(x))
+            this.x = x[0], this.y = x[1]
+        else
+            this.x = x.x, this.y = x.y
     }
 
     /**
