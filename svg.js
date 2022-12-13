@@ -57,8 +57,8 @@ class Vector {
      * @returns {Vector} The vector divided by the scalar or divided component-wise by the vector.
     */
     div(v) {
-        if (typeof v === 'number') 
-            return new Vector(this.x / v, this.y / v)
+        if (typeof v === 'number')
+            return inv = 1/v, new Vector(this.x * inv, this.y * inv)
         else 
             return new Vector(this.x / v.x, this.y / v.y)
     }
