@@ -20,12 +20,58 @@ class Vector {
      */
     asObject() { return { x: this.x, y: this.y } }
 
+
+    /**
+     * Adds a vector to this vector.
+     * @param {Vector} v The vector to add.
+     * @returns {Vector} The vector sum of the two vectors.
+    */
+    add(v) {
+        return new Vector(this.x + v.x, this.y + v.y)
+    }
+
+    /**    
+     * Subtracts a vector from this vector.
+     * @param {Vector} v The vector to subtract.
+     * @returns {Vector} The vector difference of the two vectors.
+    */
+    sub(v) {
+        return new Vector(this.x - v.x, this.y - v.y)
+    }
+
+    /**
+     * Multiplies this vector by a scalar or a vector.
+     * @param {number|Vector} v The scalar or vector to multiply the vector by.
+     * @returns {Vector} The vector scaled by the scalar or multiplied component-wise by the vector.
+    */
+    mult(v) {
+        if (typeof v === 'number') 
+            return new Vector(this.x * v, this.y * v)
+        else 
+            return new Vector(this.x * v.x, this.y * v.y)
+    }
+    
+    /**
+     * Divides this vector by a scalar or a vector.
+     * @param {number|Vector} v The scalar or vector to divide the vector by.
+     * @returns {Vector} The vector divided by the scalar or divided component-wise by the vector.
+    */
+    div(v) {
+        if (typeof v === 'number') 
+            return new Vector(this.x / v, this.y / v)
+        else 
+            return new Vector(this.x / v.x, this.y / v.y)
+    }
+
+
+
+
     /**
      * Computes the length of the vector.
      * @returns {number} The length of the vector.
      */
     length() {
-        return Math.sqrt(this.x * this.x + this.y * this.y);
+        return Math.sqrt(this.x * this.x + this.y * this.y)
     }
 
     /**
@@ -34,10 +80,10 @@ class Vector {
      * @returns {number}   The distance between the two vectors.
      */
     distance(v) {
-        const tmp = [this.x - v.x, this.y - v.y];
-        return Math.sqrt(tmp[0] * tmp[0] + tmp[1] * tmp[1]);
+        const tmp = [this.x - v.x, this.y - v.y]
+        return Math.sqrt(tmp[0] * tmp[0] + tmp[1] * tmp[1])
     }
-    
+
     /**
      * Normalizes the vector (i.e. sets its length to 1).
      * @returns {Vector} The normalized vector.
