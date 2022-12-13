@@ -1,27 +1,117 @@
-class VectorMath {
+class Vector {
+    /**
+     * Constructs a new Vector instance with the specified x and y coordinates.
+     * @param {number} x The x coordinate of the vector.
+     * @param {number} y The y coordinate of the vector.
+     */
+    constructor(x, y) {
+        this.x = x
+        this.y = y
+    }
 
-    static length( vector ) {
-        return Math.sqrt( vector.x * vector.x + vector.y * vector.y )
-    }
-    static distance( vector1, vector2 ) {
-        const tmp = [ vector1.x - vector2.x, vector1.y - vector2.y ]
-        return Math.sqrt( tmp[0] * tmp[0] + tmp[1] * tmp[1] )
+    /**
+     * Returns the vector as an array in the form [x, y].
+     * @returns {[number,number]} The vector as an array.
+     */
+    asArray() { return [this.x, this.y] }
+    /**
+     * Returns the vector as an object in the form {x, y}.
+     * @returns {{x: number, y: number}} The vector as an object.
+     */
+    asObject() { return { x: this.x, y: this.y } }
+
+    /**
+     * Computes the length of the vector.
+     * @returns {number} The length of the vector.
+     */
+    length() {
+        return Math.sqrt(this.x * this.x + this.y * this.y);
     }
 
-    static normalize( vector ) {
-        const scale = 1 / this.length(vector)
-        return { x: vector.x * scale, y: vector.y * scale }
+    /**
+     * Computes the distance between this vector and another vector.
+     * @param   {Vector} v The other vector.
+     * @returns {number}   The distance between the two vectors.
+     */
+    distance(v) {
+        const tmp = [this.x - v.x, this.y - v.y];
+        return Math.sqrt(tmp[0] * tmp[0] + tmp[1] * tmp[1]);
     }
-    static setLength( vector, targetLength ) {
-        const scale = targetLength / this.length(vector)
-        return { x: vector.x * scale, y: vector.y * scale }
+    
+    /**
+     * Normalizes the vector (i.e. sets its length to 1).
+     * @returns {Vector} The normalized vector.
+     */
+    normalize() {
+        const scale = 1 / this.length()
+        this.x *= scale
+        this.y *= scale
+        return this
+    }
+
+    /**
+    * Sets the length of a vector.
+    * @param {number} targetLength The target length for the vector.
+    * @returns {Vector} The vector with its length set to the target length.
+    */
+    setLength(targetLength) {
+        const scale = targetLength / this.length()
+        this.x *= scale
+        this.y *= scale
+        return this
+    }
+
+    ///////////////////////////////////////////////////////////////////
+    // Static /////////////////////////////////////////////////////////
+    ///////////////////////////////////////////////////////////////////
+
+    /**
+    * Computes the length of a vector.
+    * @param {Vector} v The vector to compute the length of.
+    * @returns {number} The length of the vector.
+    */
+    static length(v) {
+        return Math.sqrt(v.x * v.x + v.y * v.y)
+    }
+
+    /**
+    * Computes the distance between two vectors.
+    * @param {Vector} v1 The first vector.
+    * @param {Vector} v2 The second vector.
+    * @returns {number} The distance between the two vectors.
+    */
+    static distance(v1, v2) {
+        const tmp = [v1.x - v2.x, v1.y - v2.y]
+        return Math.sqrt(tmp[0] * tmp[0] + tmp[1] * tmp[1])
+    }
+
+    /**
+    * Normalizes a vector (i.e. sets its length to 1).
+    * @param {Vector} v The vector to normalize.
+    * @returns {Vector} The normalized vector.
+    */
+    static normalize(v) {
+        const scale = 1 / this.length(v)
+        return new Vector(v.x * scale, v.y * scale)
+    }
+
+    /**
+    * Sets the length of a vector.
+    * @param {Vector} v The vector to set the length of.
+    * @param {number} targetLength The target length for the vector.
+    * @returns {Vector} The vector with its length set to the target length.
+    */
+    static setLength(v, targetLength) {
+        const scale = targetLength / this.length(v)
+        return new Vector(v.x * scale, v.y * scale)
     }
 
 }
 
+
 class SVGTemplate {
     /** @param {string} type */
-    constructor( type ) {
+    constructor(type) {
         this.ele = document.createElementNS("http://www.w3.org/2000/svg", type)
 
         /** @type {Object.<string,string>} */
@@ -30,57 +120,57 @@ class SVGTemplate {
         this.transformAttributes = {}
     }
     /** @param {string} attribute @param {string} value */
-    set( attribute, value ) { return this.ele.setAttribute( attribute, value ), this.attributes[attribute] = value, this }
+    set(attribute, value) { return this.ele.setAttribute(attribute, value), this.attributes[attribute] = value, this }
 
     /** @param {Object.<string,string>} defaults @param {Object.<string,string>} override */
-    setDefaults( defaults, override ) {
+    setDefaults(defaults, override) {
         const attributes = Object.assign(defaults, override)
-        for ( const attribute in attributes ) this.set(attribute, attributes[attribute])
+        for (const attribute in attributes) this.set(attribute, attributes[attribute])
     }
 
     // Animation ///////////////////////////////////////////////
 
     /** @param {number} millisecondsSinceInitialisation */
-    update( millisecondsSinceInitialisation = Infinity ) { 
-        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+    update(millisecondsSinceInitialisation = Infinity) {
+        if (this.updateCallback != undefined) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
         return this
     }
 
     /** @param {(SVGObject: this, millisecondsSinceInitialisation: number)=>void} updateFunction */
-    onUpdate( updateFunction ) { return this.updateCallback = updateFunction, this }
-    
+    onUpdate(updateFunction) { return this.updateCallback = updateFunction, this }
+
     // Style //////////////////////////////////////////////////
-    
+
     /** @param {string} cssColor */
-    fill( cssColor )   { return this.set("fill", cssColor), this }
+    fill(cssColor) { return this.set("fill", cssColor), this }
     /** @param {string} cssColor */
-    color( cssColor )  { return this.set("stroke", cssColor), this }
+    color(cssColor) { return this.set("stroke", cssColor), this }
 
     /** @param {number} width */
-    width( width )     { return this.set("stroke-width", width), this }
+    width(width) { return this.set("stroke-width", width), this }
     /** @param {string} linecap */
-    linecap( linecap ) { return this.set("stroke-linecap", linecap), this }
+    linecap(linecap) { return this.set("stroke-linecap", linecap), this }
 
     /** @param {number} opacity */
-    opacity( opacity ) { return this.set("opacity", opacity), this }
+    opacity(opacity) { return this.set("opacity", opacity), this }
 
     applyTransforms() {
         let transformProperty = ""
-        for ( const transform in this.transformAttributes ) {
+        for (const transform in this.transformAttributes) {
             transformProperty += ` ${transform}(${this.transformAttributes[transform].join(",")}) `
         }
         this.set("transform", transformProperty)
         return this
     }
 
-    scale( x, y ) {
-        this.transformAttributes.scale = [ x, y ?? x ]
+    scale(x, y) {
+        this.transformAttributes.scale = [x, y ?? x]
         this.applyTransforms()
         return this
     }
 
-    rotate( angle ) {
-        this.transformAttributes.rotate = [ angle ]
+    rotate(angle) {
+        this.transformAttributes.rotate = [angle]
         return this.applyTransforms()
     }
 
@@ -96,127 +186,133 @@ class SVGTemplate {
      * @param {number} radius 
      * @param {[number,number]|{x:number,y:number}} center 
      **/
-    static circlePoint( angle, radius = 1, center = [0,0] ) {
-        return { 
-            x: Math.sin(angle) * radius + center[0] ?? center.x, 
+    static circlePoint(angle, radius = 1, center = [0, 0]) {
+        return {
+            x: Math.sin(angle) * radius + center[0] ?? center.x,
             y: Math.cos(angle) * radius + center[1] ?? center.y,
-            asArray() { return [ this.x, this.y ] }
+            asArray() { return [this.x, this.y] }
         }
     }
 
     // Curves ////////////////////////////////////////////////
 
-    static get cubicBezier() { return {
+    static get cubicBezier() {
+        return {
 
-        controlPoint1( lastlast, last, current, guideDistance ) {
-            guideDistance ??= VectorMath.distance(last, current)
+            controlPoint1(lastlast, last, current, guideDistance) {
+                guideDistance ??= Vector.distance(last, current)
 
-            const guideVector = VectorMath.setLength({ 
-                x: current.x - lastlast.x, 
-                y: current.y - lastlast.y 
-            }, guideDistance / 3)
+                const guideVector = Vector.setLength({
+                    x: current.x - lastlast.x,
+                    y: current.y - lastlast.y
+                }, guideDistance / 3)
 
-            const controlPoint = { 
-                x: last.x + guideVector.x,
-                y: last.y + guideVector.y
-            }
-
-            return {
-                point: controlPoint,
-                guideVector: guideVector
-            }
-        },
-
-        controlPoint2( last, current, next, guideDistance ) {
-            guideDistance ??= VectorMath.distance(last, current)
-
-            const guideVector = VectorMath.setLength({ 
-                x: last.x - next.x, 
-                y: last.y - next.y 
-            }, guideDistance / 3)
-
-            const controlPoint = { 
-                x: current.x + guideVector.x,
-                y: current.y + guideVector.y
-            }
-
-            return {
-                point: controlPoint,
-                guideVector: guideVector
-            }
-        },
-
-        controlPoints( lastlast, last, current, next, guideDistance ) {
-            if ( !last || !current )  throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points")
-            if ( !lastlast && !next ) throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'lastlast' and 'next' are undefined. At least one is required to calculate control points")
-            
-            guideDistance ??= VectorMath.distance(last, current)
-
-            if ( lastlast && next ) { // Both are defined, simply calculate control points
-                return [
-                    this.controlPoint1(lastlast, last, current, guideDistance),
-                    this.controlPoint2(last, current, next, guideDistance),
-                ]
-            }
-
-            if ( next ) { // 'lastlast' is not defined
-                const cp2 = this.controlPoint2(last, current, next, guideDistance)
-                const cp1 = {
-                    point: {
-                        x: last.x + ( ( current.x + cp2.guideVector.x * 1.5 ) - last.x ) / 3,
-                        y: last.y + ( ( current.y + cp2.guideVector.y * 1.5 ) - last.y ) / 3,
-                    },
-                    guideVector: undefined
+                const controlPoint = {
+                    x: last.x + guideVector.x,
+                    y: last.y + guideVector.y
                 }
-                return [ cp1, cp2 ]
-            }
 
-            if ( lastlast ) { // 'next' is not defined
-                const cp1 = this.controlPoint1(lastlast, last, current, guideDistance)
-                const cp2 = {
-                    point: {
-                        x: current.x + ( ( last.x + cp1.guideVector.x * 1.5 ) - current.x ) / 3,
-                        y: current.y + ( ( last.y + cp1.guideVector.y * 1.5 ) - current.y ) / 3,
-                    },
-                    guideVector: undefined
+                return {
+                    point: controlPoint,
+                    guideVector: guideVector
                 }
-                return [ cp1, cp2 ]
-            }
+            },
 
-            throw new Error("SVGTeplate.cubicBezier.controlPoints(): What the actual fuck?")
+            controlPoint2(last, current, next, guideDistance) {
+                guideDistance ??= Vector.distance(last, current)
 
-        },
+                const guideVector = Vector.setLength({
+                    x: last.x - next.x,
+                    y: last.y - next.y
+                }, guideDistance / 3)
 
-    }}
+                const controlPoint = {
+                    x: current.x + guideVector.x,
+                    y: current.y + guideVector.y
+                }
+
+                return {
+                    point: controlPoint,
+                    guideVector: guideVector
+                }
+            },
+
+            controlPoints(lastlast, last, current, next, guideDistance) {
+                if (!last || !current) throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points")
+                if (!lastlast && !next) throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'lastlast' and 'next' are undefined. At least one is required to calculate control points")
+
+                guideDistance ??= Vector.distance(last, current)
+
+                if (lastlast && next) { // Both are defined, simply calculate control points
+                    return [
+                        this.controlPoint1(lastlast, last, current, guideDistance),
+                        this.controlPoint2(last, current, next, guideDistance),
+                    ]
+                }
+
+                if (next) { // 'lastlast' is not defined
+                    const cp2 = this.controlPoint2(last, current, next, guideDistance)
+                    const cp1 = {
+                        point: {
+                            x: last.x + ((current.x + cp2.guideVector.x * 1.5) - last.x) / 3,
+                            y: last.y + ((current.y + cp2.guideVector.y * 1.5) - last.y) / 3,
+                        },
+                        guideVector: undefined
+                    }
+                    return [cp1, cp2]
+                }
+
+                if (lastlast) { // 'next' is not defined
+                    const cp1 = this.controlPoint1(lastlast, last, current, guideDistance)
+                    const cp2 = {
+                        point: {
+                            x: current.x + ((last.x + cp1.guideVector.x * 1.5) - current.x) / 3,
+                            y: current.y + ((last.y + cp1.guideVector.y * 1.5) - current.y) / 3,
+                        },
+                        guideVector: undefined
+                    }
+                    return [cp1, cp2]
+                }
+
+                throw new Error("SVGTeplate.cubicBezier.controlPoints(): What the actual fuck?")
+
+            },
+
+        }
+    }
 
 
     // Defaults //////////////////////////////////////////////
 
     /** @returns {Object.<string,string>} */
-    static get lineDefaults() { return {
-        "fill": "none",
-        "stroke-width": "10",
-        "stroke": "black",
-        "stroke-linecap": "round",
-    }}
+    static get lineDefaults() {
+        return {
+            "fill": "none",
+            "stroke-width": "10",
+            "stroke": "black",
+            "stroke-linecap": "round",
+        }
+    }
 
     /** @returns {Object.<string,string>} */
-    static get fillDefaults() { return {
-        "fill": "black",
-        "stroke-width": "10",
-        "stroke": "none",
-        "stroke-linecap": "round",
-    }}
+    static get fillDefaults() {
+        return {
+            "fill": "black",
+            "stroke-width": "10",
+            "stroke": "none",
+            "stroke-linecap": "round",
+        }
+    }
 }
 
 class SVGArc extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
-    constructor( opts = {} ) {
-        super( "path" )
+    constructor(opts = {}) {
+        super("path")
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
         /** @private */
-        this.centerPosition = [0,0]
+        this.centerPosition = [0, 0]
         /** @private */
         this.startAngle = 0
         /** @private */
@@ -230,8 +326,8 @@ class SVGArc extends SVGTemplate {
      * @param {number} x - The x coordinate of the center.
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
-    center( x,y ) {
-        this.centerPosition = [ x, y ?? x ]
+    center(x, y) {
+        this.centerPosition = [x, y ?? x]
         return this
     }
 
@@ -240,7 +336,7 @@ class SVGArc extends SVGTemplate {
      * @param {number} startAngle - The starting angle of the arc, in radians.
      * @param {number} endAngle - The ending angle of the arc, in radians.
      */
-    angles( startAngle, endAngle ) {
+    angles(startAngle, endAngle) {
         this.startAngle = startAngle
         this.endAngle = endAngle
         return this
@@ -251,7 +347,7 @@ class SVGArc extends SVGTemplate {
      * @param {number} startAngle - The starting angle of the arc, as a value between 0 and 1.
      * @param {number} endAngle - The ending angle of the arc, as a value between 0 and 1.
      */
-    anglesNormalized( startAngle, endAngle ) {
+    anglesNormalized(startAngle, endAngle) {
         this.startAngle = startAngle * Math.PI * 2
         this.endAngle = endAngle * Math.PI * 2
         return this
@@ -261,7 +357,7 @@ class SVGArc extends SVGTemplate {
      * Sets the radius of the circular arc.
      * @param {number} radius - The radius of the circular arc.
      */
-    radius( radius ) {
+    radius(radius) {
         this.circularRadius = radius
         return this
     }
@@ -270,9 +366,9 @@ class SVGArc extends SVGTemplate {
      * Updates the arc to reflect any changes to its properties.
      * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
      */
-    update( millisecondsSinceInitialisation = Infinity ) {
+    update(millisecondsSinceInitialisation = Infinity) {
         // If an update callback function has been set, call it.
-        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+        if (this.updateCallback != undefined) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
         // Store the start and end angles in an object.
         const angles = { start: this.startAngle, end: this.endAngle }
@@ -280,14 +376,14 @@ class SVGArc extends SVGTemplate {
         const radius = this.circularRadius
 
         // Calculate the start and end positions using basic trigonometry.
-        let startPos = SVGTemplate.circlePoint( this.startAngle, this.circularRadius, this.centerPosition )
-        let endPos = SVGTemplate.circlePoint( this.endAngle, this.circularRadius, this.centerPosition )
+        let startPos = SVGTemplate.circlePoint(this.startAngle, this.circularRadius, this.centerPosition)
+        let endPos = SVGTemplate.circlePoint(this.endAngle, this.circularRadius, this.centerPosition)
         // Prevent flicker when the start and end positions are almost the same.
-        if ( Math.abs(startPos.x - endPos.x) < 0.0001 ) startPos.x += 0.0001
-        if ( Math.abs(startPos.y - endPos.y) < 0.0001 ) startPos.y += 0.0001
+        if (Math.abs(startPos.x - endPos.x) < 0.0001) startPos.x += 0.0001
+        if (Math.abs(startPos.y - endPos.y) < 0.0001) startPos.y += 0.0001
 
         // Calculate the angular length of the arc.
-        let angularLength = (angles.end - angles.start) / ( Math.PI * 2 ) % 1
+        let angularLength = (angles.end - angles.start) / (Math.PI * 2) % 1
 
         // Initialize the "path" string that will be used to define the SVG path element.
         let path = ""
@@ -313,50 +409,52 @@ class SVGArc extends SVGTemplate {
 
 class SVGPath extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
-    constructor( opts = {} ) {
-        super( "path" )
+    constructor(opts = {}) {
+        super("path")
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
         /** @private @type {'line'|'cubic bezier'|'quadratic bezier'|'custom'} */
-        this.pathMode   = "line"
+        this.pathMode = "line"
         /** @private @type {{type: 'line'|'cubic bezier'|'quadratic bezier'|'close'|'custom', x: number, y:number, custom?:string}[]} */
         this.pathPoints = []
         /** @private @type {boolean} */
-        this.closed     = false
+        this.closed = false
     }
 
     /**
      * Sets the path mode, which determines how subsequent points in the path will be connected.
      * @param {'line'|'bezier'|'cubic bezier'|'quadratic bezier'|'custom'} mode - The path mode to set.
      */
-    mode( mode ) { return this.pathMode = {
-        "L": "line",
-        "line": "line",
+    mode(mode) {
+        return this.pathMode = {
+            "L": "line",
+            "line": "line",
 
-        "C": "cubic bezier",
-        "S": "cubic bezier",
-        "bezier": "cubic bezier",
-        "cubic bezier": "cubic bezier",
-        
-        "Q": "quadratic bezier",
-        "T": "quadratic bezier",
-        "quadratic bezier": "quadratic bezier",
+            "C": "cubic bezier",
+            "S": "cubic bezier",
+            "bezier": "cubic bezier",
+            "cubic bezier": "cubic bezier",
 
-        "custom": "custom",
-    }[mode], this }
+            "Q": "quadratic bezier",
+            "T": "quadratic bezier",
+            "quadratic bezier": "quadratic bezier",
+
+            "custom": "custom",
+        }[mode], this
+    }
 
     /** 
      * Adds a point to the path.
      * @param {number|string} x - The x coordinate of the point, or a custom string when mode has been set to "custom"
      * @param {number=} y - The y coordinate of the point. If not provided, the x coordinate is used for both x and y.
      */
-    point( x, y ) { 
+    point(x, y) {
         this.pathPoints.push(
             this.pathMode == "custom" ?
-            { type: this.pathMode, x: NaN, y: NaN, custom: x } :
-            { type: this.pathMode, x: x, y: y ?? x }
+                { type: this.pathMode, x: NaN, y: NaN, custom: x } :
+                { type: this.pathMode, x: x, y: y ?? x }
         )
-        return this 
+        return this
     }
 
     /**
@@ -374,36 +472,36 @@ class SVGPath extends SVGTemplate {
      * Updates the path.
      * @param {number} millisecondsSinceInitialisation - The number of milliseconds that have elapsed since the path was initialized.
      */
-    update( millisecondsSinceInitialisation = Infinity ) { 
-        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+    update(millisecondsSinceInitialisation = Infinity) {
+        if (this.updateCallback != undefined) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
         let path = ""
-        for ( const [i, point] of this.pathPoints.entries() ) {
+        for (const [i, point] of this.pathPoints.entries()) {
 
-            if ( i == 0 ) {
+            if (i == 0) {
                 path += `M ${point.x} ${point.y} `
                 continue
             }
 
-            if ( point.type == "close" ) {
-                const lastPoint = this.pathPoints[i-1]
+            if (point.type == "close") {
+                const lastPoint = this.pathPoints[i - 1]
                 if (lastPoint.type != "cubic bezier") {
                     path += "Z "
                 } else {
                     const points = {
                         // Set next point to be the first to close the path smoothly
-                        "-2": this.pathPoints[i-2], // Undefined only when Path is a single point
-                        "-1": this.pathPoints[i-1], // Always available
-                        "0" : this.pathPoints[0],   // Always available
-                        "1" : this.pathPoints[1],   // Always available
+                        "-2": this.pathPoints[i - 2], // Undefined only when Path is a single point
+                        "-1": this.pathPoints[i - 1], // Always available
+                        "0": this.pathPoints[0],   // Always available
+                        "1": this.pathPoints[1],   // Always available
                     }
                     const controlPoints = SVGTemplate.cubicBezier.controlPoints(points[-2], points[-1], points[0], points[1])
                     path += `C ${controlPoints[0].point.x} ${controlPoints[0].point.y} ${controlPoints[1].point.x} ${controlPoints[1].point.y} ${point.x} ${point.y} Z `
                 }
-                break 
+                break
             }
 
-            switch ( point.type ) {
+            switch (point.type) {
                 case "line":
                     path += `L ${point.x} ${point.y} `
                     break
@@ -411,14 +509,14 @@ class SVGPath extends SVGTemplate {
                     const points = {
                         // If the path is closed and this is the first curve, use last point as previous to first
                         // last point is at index '-2' since the 'close' tag is in the last place
-                        "-2": this.closed && i == 1 ? this.pathPoints[this.pathPoints.length - 2] : this.pathPoints[i-2], // May be undefined 
-                        "-1": this.pathPoints[i-1], // Always available
-                        "0" : this.pathPoints[i],   // Always available
-                        "1" : this.pathPoints[i+1], // May be undefined
+                        "-2": this.closed && i == 1 ? this.pathPoints[this.pathPoints.length - 2] : this.pathPoints[i - 2], // May be undefined 
+                        "-1": this.pathPoints[i - 1], // Always available
+                        "0": this.pathPoints[i],   // Always available
+                        "1": this.pathPoints[i + 1], // May be undefined
                     }
 
                     // Only two available points, draw a line
-                    if ( !(points[-2] || points[1]) ) { 
+                    if (!(points[-2] || points[1])) {
                         path += `L ${point.x} ${point.y} `
                         break
                     }
@@ -426,8 +524,8 @@ class SVGPath extends SVGTemplate {
                     const controlPoints = SVGTemplate.cubicBezier.controlPoints(points[-2], points[-1], points[0], points[1])
 
                     path += `C ${controlPoints[0].point.x} ${controlPoints[0].point.y} `
-                          + `${controlPoints[1].point.x} ${controlPoints[1].point.y} `
-                          + `${point.x} ${point.y} `
+                        + `${controlPoints[1].point.x} ${controlPoints[1].point.y} `
+                        + `${point.x} ${point.y} `
                     break
                 case "quadratic bezier":
                     path += `T ${point.x} ${point.y} `
@@ -438,9 +536,9 @@ class SVGPath extends SVGTemplate {
                 default:
                     throw new Error(`SVGPath.update(): Unexpected Point Type '${point.type}'`)
             }
-    
+
         }
-    
+
         this.set("d", path)
         return this
     }
@@ -449,65 +547,65 @@ class SVGPath extends SVGTemplate {
 
 class SVGLine extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
-    constructor( opts = {} ) {
-        super( "line" )
+    constructor(opts = {}) {
+        super("line")
         this.setDefaults(SVGTemplate.lineDefaults, opts)
 
         /** @private */
         this.coordinateMode = "point"
         /** @private */
         this.angleMode = {
-            center: [0,0],
-            angle:  0,
+            center: [0, 0],
+            angle: 0,
             startRadius: 0,
-            endRadius:   0,
+            endRadius: 0,
         }
         /** @private */
         this.pointMode = {
-            start: [0,0],
-            end:   [0,0],
+            start: [0, 0],
+            end: [0, 0],
         }
     }
 
     /** @param {"point"|"angle"} coordinateMode */
-    mode( coordinateMode ) { return this.coordinateMode = coordinateMode, this }
+    mode(coordinateMode) { return this.coordinateMode = coordinateMode, this }
 
     /** @param {number} x @param {number=} y */
-    start( x,y ) { return this.pointMode.start = [x,y??x], this.set("x1", x).set("y1", y) }
+    start(x, y) { return this.pointMode.start = [x, y ?? x], this.set("x1", x).set("y1", y) }
     /** @param {number} x @param {number=} y */
-    end( x,y )   { return this.pointMode.end = [x,y??x],   this.set("x2", x).set("y2", y) }
+    end(x, y) { return this.pointMode.end = [x, y ?? x], this.set("x2", x).set("y2", y) }
 
     /** @param {number} x @param {number=} y */
-    center( x,y )    { return this.angleMode.center = [x,y??x], this }
+    center(x, y) { return this.angleMode.center = [x, y ?? x], this }
     /** @param {number} a */
-    angle( a )       { return this.angleMode.angle = a, this }
+    angle(a) { return this.angleMode.angle = a, this }
     /** @param {number} a */
-    angleNormalized( a ) { return this.angleMode.angle = a * Math.PI * 2, this }
+    angleNormalized(a) { return this.angleMode.angle = a * Math.PI * 2, this }
     /** @param {number} r */
-    startRadius( r ) { return this.angleMode.startRadius = r, this }
+    startRadius(r) { return this.angleMode.startRadius = r, this }
     /** @param {number} r */
-    endRadius( r )   { return this.angleMode.endRadius = r, this }
+    endRadius(r) { return this.angleMode.endRadius = r, this }
     /** @param {number} startRadius @param {number} endRadius */
-    radii( startRadius, endRadius ) { return this.startRadius(startRadius).endRadius(endRadius) }
+    radii(startRadius, endRadius) { return this.startRadius(startRadius).endRadius(endRadius) }
 
     // Animation //////////////////////////////////////////
 
     /** @param {number} millisecondsSinceInitialisation */
-    update( millisecondsSinceInitialisation = Infinity ) { 
-        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
-        if ( this.coordinateMode == "point" )
+    update(millisecondsSinceInitialisation = Infinity) {
+        if (this.updateCallback != undefined) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+        if (this.coordinateMode == "point")
             return this.set("x1", this.pointMode.start[0]).set("y1", this.pointMode.start[1])
-                       .set("x2", this.pointMode.end[0])  .set("y2", this.pointMode.end[1])
-        
-        if ( this.coordinateMode == "angle" ) {
+                .set("x2", this.pointMode.end[0]).set("y2", this.pointMode.end[1])
 
-            const startPos   = SVGTemplate.circlePoint( this.angleMode.angle, this.angleMode.startRadius, this.angleMode.center )
-            const endPos     = SVGTemplate.circlePoint( this.angleMode.angle, this.angleMode.endRadius,   this.angleMode.center )
+        if (this.coordinateMode == "angle") {
+
+            const startPos = SVGTemplate.circlePoint(this.angleMode.angle, this.angleMode.startRadius, this.angleMode.center)
+            const endPos = SVGTemplate.circlePoint(this.angleMode.angle, this.angleMode.endRadius, this.angleMode.center)
 
             return this.set("x1", startPos.x).set("y1", startPos.y)
-                       .set("x2", endPos.x)  .set("y2", endPos.y)
+                .set("x2", endPos.x).set("y2", endPos.y)
         }
-        
+
         throw new Error(`Positioning mode '${this.coordinateMode}' not recognized. Available modes are: 'point', 'angle'`)
     }
 
@@ -515,12 +613,12 @@ class SVGLine extends SVGTemplate {
 
 class SVGCircle extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
-    constructor( opts = {} ) {
-        super( "circle" )
+    constructor(opts = {}) {
+        super("circle")
         this.setDefaults(SVGTemplate.fillDefaults, opts)
 
         /** @private */
-        this.centerPosition = [0,0]
+        this.centerPosition = [0, 0]
         /** @private */
         this.circularRadius = 0
     }
@@ -530,20 +628,20 @@ class SVGCircle extends SVGTemplate {
      * @param {number} x - The x coordinate of the center.
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
-    center( x, y ) { return this.centerPosition = [x, y ?? x], this }
+    center(x, y) { return this.centerPosition = [x, y ?? x], this }
     /** 
      * Sets the radius of the circle.
      * @param {number} r - The radius of the circle.
      */
-    radius( r ) { return this.circularRadius = r, this }
+    radius(r) { return this.circularRadius = r, this }
 
     /** 
      * Updates the circle to reflect any changes to its properties.
      * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
      */
-    update( millisecondsSinceInitialisation = Infinity ) {
+    update(millisecondsSinceInitialisation = Infinity) {
         // If an update callback function has been set, call it.
-        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+        if (this.updateCallback != undefined) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
         // Update the SVG circle element to reflect the current center and radius values.
         this.set("cx", this.centerPosition[0]).set("cy", this.centerPosition[1]).set("r", this.circularRadius)
@@ -553,14 +651,14 @@ class SVGCircle extends SVGTemplate {
 
 class SVGEllipse extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
-    constructor( opts = {} ) {
-        super( "ellipse" )
+    constructor(opts = {}) {
+        super("ellipse")
         this.setDefaults(SVGTemplate.fillDefaults, opts)
 
         /** @private */
-        this.centerPosition = [0,0]
+        this.centerPosition = [0, 0]
         /** @private */
-        this.ellipseRadii   = [0,0]
+        this.ellipseRadii = [0, 0]
     }
 
     /** 
@@ -568,21 +666,21 @@ class SVGEllipse extends SVGTemplate {
      * @param {number} x - The x coordinate of the center.
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
-    center( x, y ) { return this.centerPosition = [ x, y ?? x ], this }
+    center(x, y) { return this.centerPosition = [x, y ?? x], this }
     /** 
      * Sets the radius of the circle.
      * @param {number} rx - The x-radius of the ellipse.
      * @param {number=} ry - The y-radius of the ellipse. If not provided, the x-radius is used for both x and y.
      */
-    radius( rx, ry ) { return this.ellipseRadii = [ rx, ry ?? rx ], this }
+    radius(rx, ry) { return this.ellipseRadii = [rx, ry ?? rx], this }
 
     /** 
      * Updates the circle to reflect any changes to its properties.
      * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
      */
-    update( millisecondsSinceInitialisation = Infinity ) {
+    update(millisecondsSinceInitialisation = Infinity) {
         // If an update callback function has been set, call it.
-        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+        if (this.updateCallback != undefined) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
 
         // Update the SVG ellipse element to reflect the current center and radius values.
         this.set("cx", this.centerPosition[0])
@@ -595,72 +693,72 @@ class SVGEllipse extends SVGTemplate {
 
 class SVGRectangle extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
-    constructor( opts = {} ) {
-        super( "rect" )
+    constructor(opts = {}) {
+        super("rect")
         this.setDefaults(SVGTemplate.fillDefaults, opts)
-        
+
         /** @private */
         this.coordinateMode = "corner"
         /** @private */
-        this.rectangleDimensions = [0,0]
+        this.rectangleDimensions = [0, 0]
         /** @private */
-        this.rectanglePosition = [0,0]
+        this.rectanglePosition = [0, 0]
         /** @private */
-        this.borderRadii = [0,0]
+        this.borderRadii = [0, 0]
     }
 
     /**
      * Sets the coordinate mode for the rectangle.
      * @param {"center"|"corner"} coordinateMode - The coordinate mode to use. Possible values are "center" and "corner".
      */
-    mode( coordinateMode ) { return this.coordinateMode = coordinateMode, this }
+    mode(coordinateMode) { return this.coordinateMode = coordinateMode, this }
 
     /**
      * Sets the dimensions of the rectangle.
      * @param {number} width - The width of the rectangle.
      * @param {number=} height - The height of the rectangle. If not provided, the width is used for both width and height.
      */
-    dimensions( width, height ) { return this.rectangleDimensions = [width,height??width], this }
+    dimensions(width, height) { return this.rectangleDimensions = [width, height ?? width], this }
 
     /**
      * Sets the position of the rectangle.
      * @param {number} x - The x coordinate of the rectangle.
      * @param {number=} y - The y coordinate of the rectangle. If not provided, the x coordinate is used for both x and y.
      */
-    position( x, y ) { return this.rectanglePosition = [x,y??x], this }
+    position(x, y) { return this.rectanglePosition = [x, y ?? x], this }
 
     /**
      * Sets the border radii of the rectangle.
      * @param {number} rx - The x coordinate of the border radius.
      * @param {number=} ry - The y coordinate of the border radius. If not provided, the x coordinate is used for both x and y.
      */
-    radius( rx, ry ) { return this.borderRadii = [rx,ry??rx], this }
+    radius(rx, ry) { return this.borderRadii = [rx, ry ?? rx], this }
 
     /** 
      * Updates the rectangle to reflect any changes to its properties.
      * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
      */
-    update( millisecondsSinceInitialisation = Infinity ) {
+    update(millisecondsSinceInitialisation = Infinity) {
         // If an update callback function has been set, call it.
-        if ( this.updateCallback != undefined ) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
-        
-        if ( this.coordinateMode == "center" ) {
+        if (this.updateCallback != undefined) this.updateCallback.call(this, this, millisecondsSinceInitialisation)
+
+        if (this.coordinateMode == "center") {
 
             // If the coordinate mode is "center", calculate the rectangle position based on its dimensions and the center position.
-            const [width,height] = this.rectangleDimensions
-            const [x,y] = this.rectanglePosition
-            this.set("x", x - width/2)
-                .set("y", y - height/2)
+            const [width, height] = this.rectangleDimensions
+            const [x, y] = this.rectanglePosition
+            this.set("x", x - width / 2)
+                .set("y", y - height / 2)
                 .set("width", width)
                 .set("height", height)
                 .set("rx", this.borderRadii[0])
                 .set("ry", this.borderRadii[1])
 
-        } else if ( this.coordinateMode == "corner" ) {
+        } else if (this.coordinateMode == "corner") {
 
             // If the coordinate mode is "corner", use the rectangle dimensions and position as-is.
-            const [width,height] = this.rectangleDimensions
-            const [x,y] = this.rectanglePosition
+            const [width, height] = this.rectangleDimensions
+            const [x, y] = this.rectanglePosition
             this.set("x", x)
                 .set("y", y)
                 .set("width", width)
@@ -672,7 +770,7 @@ class SVGRectangle extends SVGTemplate {
             // If the coordinate mode is not recognized, throw an error.
             throw new Error(`Positioning mode '${this.coordinateMode}' not recognized. Available modes are: 'center', 'corner'`)
         }
-        
+
         return this
     }
 }
@@ -683,12 +781,12 @@ class SVGGlobal {
      * The SVG element will take up the entire size of the parent element, with its elements positioned relatively within a [0, 100] range.
      * @param {string} parentQuerySelector - The query selector used to find the parent element for the SVG image.
      */
-    constructor( parentQuerySelector ) {
+    constructor(parentQuerySelector) {
         // The initial size of the SVG element in pixels.
         const initSize = 100
 
         // Get the parent element using the provided query selector.
-        const parent = document.querySelector( parentQuerySelector )
+        const parent = document.querySelector(parentQuerySelector)
         if (parent == null) {
             throw new Error(`SVG(): Unable to bind parent. Query selector '${parentQuerySelector}' does not match a DOM element.`)
         }
@@ -698,33 +796,33 @@ class SVGGlobal {
         this.svg.setAttribute("style", `width: ${initSize}px; height: ${initSize}px`)
 
         // Change the SVG scale with the parent element size.
-        const resizeObserver = new ResizeObserver( entries => {
+        const resizeObserver = new ResizeObserver(entries => {
             // Get the size of the parent element.
             const entry = entries[0]
-            const size = [ entry.target.clientWidth, entry.target.clientHeight ]
+            const size = [entry.target.clientWidth, entry.target.clientHeight]
 
             // Scale the SVG element according to the parent size.
-            this.svg.style.transform = `translate(${(size[0]-initSize)/2}px,${(size[1]-initSize)/2}px) scale(${size[0]/100},-${size[1]/100})`
+            this.svg.style.transform = `translate(${(size[0] - initSize) / 2}px,${(size[1] - initSize) / 2}px) scale(${size[0] / 100},-${size[1] / 100})`
         })
         resizeObserver.observe(parent)
 
         // Add the SVG element to the parent element.
-        parent.appendChild( this.svg )
+        parent.appendChild(this.svg)
     }
 
     /** 
      * Adds new children to the SVG element.
      * @param {SVGTemplate[]} SVGElements - The elements to be added as children of the SVG image.
      */
-    add( ...SVGElements ) {
-        for ( const ele of SVGElements )
-            this.svg.appendChild( ele.ele )
+    add(...SVGElements) {
+        for (const ele of SVGElements)
+            this.svg.appendChild(ele.ele)
         return this
     }
 }
 
 
-const SVG = Object.assign( 
+const SVG = Object.assign(
     SVGGlobal, {
     rect: SVGRectangle,
     circle: SVGCircle,
