@@ -111,6 +111,56 @@ class Vector {
     // Static /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////
 
+
+    /**
+     * Adds two vectors.
+     * @param {Vector} v1 The first vector.
+     * @param {Vector} v2 The second vector.
+     * @returns {Vector} The vector sum of the two vectors.
+    */
+    static add(v1, v2) {
+        return new Vector(v1.x + v2.x, v1.y + v2.y)
+    }
+
+    /**
+     * Subtracts a vector from another vector.
+     * @param {Vector} v1 The vector to subtract from.
+     * @param {Vector} v2 The vector to subtract.
+     * @returns {Vector} The vector difference of the two vectors.
+    */
+    static sub(v1, v2) {
+        return new Vector(v1.x - v2.x, v1.y - v2.y)
+    }
+    
+    /**
+     * Multiplies a vector by a scalar or a vector.
+     * @param {Vector} v The vector to multiply.
+     * @param {number|Vector} s The scalar or vector to multiply the vector by.
+     * @returns {Vector} The vector scaled by the scalar or multiplied component-wise by the vector.
+    */
+    static mult(v, s) {
+        if (typeof s === 'number')
+            return new Vector(v.x * s, v.y * s)
+        else
+            return new Vector(v.x * s.x, v.y * s.y)
+    }
+
+    /**
+
+    Divides a vector by a scalar or a vector.
+    @param {Vector} v The vector to divide.
+    @param {number|Vector} s The scalar or vector to divide the vector by.
+    @returns {Vector} The vector divided by the scalar or divided component-wise by the vector.
+    */
+    static div(v, s) {
+        if (typeof s === 'number')
+            return inv = 1 / s, new Vector(v.x * inv, v.y * inv)
+        else
+            return new Vector(v.x / s.x, v.y / s.y)
+    }
+
+
+
     /**
     * Computes the length of a vector.
     * @param {Vector} v The vector to compute the length of.
