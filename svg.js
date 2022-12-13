@@ -1,7 +1,7 @@
 class Vector {
     /**
      * Constructs a new Vector instance with the specified x and y coordinates.
-     * @param {number|[number,number]|{x:number,y:number}} x The x coordinate of the vector, or an array or object containing the x and y coordinates.
+     * @param {number|[number,number]|{x:number,y:number}|Vector} x The x coordinate of the vector, or an array or object containing the x and y coordinates.
      * @param {number=} y                                    The y coordinate of the vector. This parameter is only used if x is a number.
     */
     constructor(x, y) {
@@ -112,6 +112,7 @@ class Vector {
         return this
     }
 
+
     ///////////////////////////////////////////////////////////////////
     // Static /////////////////////////////////////////////////////////
     ///////////////////////////////////////////////////////////////////
@@ -205,6 +206,29 @@ class Vector {
     static setLength(v, targetLength) {
         const scale = targetLength / this.length(v)
         return new Vector(v.x * scale, v.y * scale)
+    }
+
+    /**
+     * Generates a new object that can be used to create a vector pointing from one point to another.
+     * @param {Vector} point The point that the vector should originate from.
+     * @returns {{to: (point: Vector) => Vector}} An object containing the `to()` function that can be used to create the vector.
+     */
+    static from(point) {
+        const a = point
+        return { to(point) {
+            return new Vector(point).sub(a)
+        }}
+    }
+    /**
+     * Generates a new object that can be used to create a vector pointing from one point to another.
+     * @param {Vector} point The point that the vector should point to.
+     * @returns {{from: (point: Vector) => Vector}} An object containing the `from()` function that can be used to create the vector.
+     */
+    static to(point) {
+        const a = point 
+        return { from(point) {
+            return new Vector(a).sub(point)
+        }}
     }
 
 }
@@ -310,7 +334,7 @@ class SVGTemplate {
             */
             controlPoint1(lastlast, last, current, guideDistance) {
                 guideDistance    ??= Vector.distance(last, current)
-                const guideVector  = Vector.setLength(Vector.sub(current, lastlast), guideDistance / 3)
+                const guideVector  = Vector.setLength(Vector.from(lastlast).to(current), guideDistance / 3)
                 const controlPoint = Vector.add(last, guideVector)
                 return {
                     point: controlPoint,
@@ -328,7 +352,7 @@ class SVGTemplate {
             */
             controlPoint2(last, current, next, guideDistance) {
                 guideDistance    ??= Vector.distance(last, current)
-                const guideVector  = Vector.setLength(Vector.sub(last, next), guideDistance / 3)
+                const guideVector  = Vector.setLength(Vector.from(next).to(last), guideDistance / 3)
                 const controlPoint = Vector.add(current, guideVector)
                 return {
                     point: controlPoint,
