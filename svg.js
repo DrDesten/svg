@@ -536,6 +536,7 @@ class SVGArc extends SVGTemplate {
 
 }
 
+
 class SVGPath extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor(opts = {}) {
@@ -960,3 +961,5 @@ const SVG = Object.assign(
     path: SVGPath,
     arc: SVGArc,
 })
+
+const V2D = Vector
