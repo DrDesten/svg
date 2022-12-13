@@ -343,7 +343,10 @@ class SVGTemplate {
              * @param {Vector}  current The current point.
              * @param {Vector=} next The next point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
-             * @returns {Array<{point: Vector, guideVector: Vector}>} An array containing the two calculated control points and their corresponding guide vectors.
+             * @returns {[
+             *      {point: Vector, guideVector: Vector},
+             *      {point: Vector, guideVector: Vector}
+             * ]} An array containing the two calculated control points and their corresponding guide vectors.
             */
             controlPoints(lastlast, last, current, next, guideDistance) {
                 if (!last || !current)  throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points")
