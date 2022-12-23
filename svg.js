@@ -1,233 +1,173 @@
-class Vector {
+class Vec2 {
     /**
-     * Constructs a new Vector instance with the specified x and y coordinates.
-     * @param {number|[number,number]|{x:number,y:number}|Vector} x The x coordinate of the vector, or an array or object containing the x and y coordinates.
-     * @param {number=} y                                    The y coordinate of the vector. This parameter is only used if x is a number.
-    */
-    constructor(x, y) {
-        if (typeof x === 'number')
-            this.x = x, this.y = y
-        else if (Array.isArray(x))
-            this.x = x[0], this.y = x[1]
-        else
-            this.x = x.x, this.y = x.y
-    }
-
-    /**
-     * Returns the vector as an array in the form [x, y].
-     * @returns {[number,number]} The vector as an array.
+     * @param {number|{x:number,y:number}|Vec2|[number,number]} vector - The x coordinate or an object or array with x and y coordinates.
+     * @param {number} y - The y coordinate.
      */
-    asArray() { return [this.x, this.y] }
-    /**
-     * Returns the vector as an object in the form {x, y}.
-     * @returns {{x: number, y: number}} The vector as an object.
-     */
-    asObject() { return { x: this.x, y: this.y } }
+    constructor( vector = 0 , y ) {
+        /** @type {number} x coordinate */
+        this.x
+        /** @type {number} y coordinate */
+        this.y
 
-
-    /**
-     * Adds a vector to this vector.
-     * @param {Vector} v The vector to add.
-     * @returns {Vector} The vector sum of the two vectors.
-    */
-    add(v) {
-        return new Vector(this.x + v.x, this.y + v.y)
-    }
-
-    /**    
-     * Subtracts a vector from this vector.
-     * @param {Vector} v The vector to subtract.
-     * @returns {Vector} The vector difference of the two vectors.
-    */
-    sub(v) {
-        return new Vector(this.x - v.x, this.y - v.y)
-    }
-
-    /**
-     * Multiplies this vector by a scalar or a vector.
-     * @param {number|Vector} v The scalar or vector to multiply the vector by.
-     * @returns {Vector} The vector scaled by the scalar or multiplied component-wise by the vector.
-    */
-    mult(v) {
-        if (typeof v === 'number') 
-            return new Vector(this.x * v, this.y * v)
+        if (typeof vector == "number")
+            this.x = vector, 
+            this.y = y ?? vector
         else 
-            return new Vector(this.x * v.x, this.y * v.y)
-    }
-    
-    /**
-     * Divides this vector by a scalar or a vector.
-     * @param {number|Vector} v The scalar or vector to divide the vector by.
-     * @returns {Vector} The vector divided by the scalar or divided component-wise by the vector.
-    */
-    div(v) {
-        if (typeof v === 'number') {
-            const inv = 1 / v
-            return new Vector(this.x * inv, this.y * inv)
-        } else 
-            return new Vector(this.x / v.x, this.y / v.y)
-    }
+            this.x = vector.x ?? vector[0], 
+            this.y = vector.y ?? vector[1] ?? this.x
+    }   
 
-
-
+    /** @type {number} x coordinate */
+    get "0"(){ return this.x }
+    /** @type {number} y coordinate */
+    get "1"(){ return this.y }
+    /** @type {Vec2} */
+    get xx() { return new Vec2( this.x, this.x ) }
+    /** @type {Vec2} clones the vector */
+    get xy() { return new Vec2( this.x, this.y ) }
+    /** @type {Vec2} */
+    get yy() { return new Vec2( this.y, this.y ) }
+    /** @type {Vec2} */
+    get yx() { return new Vec2( this.y, this.x ) }
 
     /**
-     * Computes the length of the vector.
-     * @returns {number} The length of the vector.
+     * Adds the specified vector to this Vec2 instance.
+     * @param {number|Vec2} vector - A number or a Vec2 instance to add.
+     * @returns {Vec2} A new Vec2 instance with the result of the addition.
+     */
+    add( vector ) {
+        if ( typeof vector == "number" )
+            return new Vec2( this.x + vector , this.y + vector ) 
+        else
+            return new Vec2( this.x + vector.x , this.y + vector.y ) 
+    }
+
+    /**
+     * Subtracts the specified vector from this Vec2 instance.
+     * @param {number|Vec2} vector - A number or a Vec2 instance to subtract.
+     * @returns {Vec2} A new Vec2 instance with the result of the subtraction.
+     */
+    sub( vector ) { 
+        if ( typeof vector == "number" )
+            return new Vec2( this.x - vector , this.y - vector ) 
+        else
+            return new Vec2( this.x - vector.x , this.y - vector.y ) 
+    }
+
+    /**
+     * Multiplies this Vec2 instance by the specified vector.
+     * @param {number|Vec2} vector - A number or a Vec2 instance to multiply by.
+     * @returns {Vec2} A new Vec2 instance with the result of the multiplication.
+     */
+    mul( vector ) { 
+        if ( typeof vector == "number" )
+            return new Vec2( this.x * vector , this.y * vector ) 
+        else
+            return new Vec2( this.x * vector.x , this.y * vector.y ) 
+    }
+
+    /**
+     * Divides this Vec2 instance by the specified vector.
+     * @param {number|Vec2} vector - A number or a Vec2 instance to divide by.
+     * @returns {Vec2} A new Vec2 instance with the result of the division.
+     */
+    div( vector ) { 
+        if ( typeof vector == "number" )
+            return new Vec2( this.x / vector , this.y / vector ) 
+        else
+            return new Vec2( this.x / vector.x , this.y / vector.y ) 
+    }
+
+
+    /**
+     * Calculates the length of this Vec2 instance.
+     * @returns {number} The length of the Vec2 instance.
      */
     length() {
-        return Math.sqrt(this.x * this.x + this.y * this.y)
+        return Math.sqrt( this.x * this.x + this.y * this.y )
     }
 
     /**
-     * Computes the distance between this vector and another vector.
-     * @param   {Vector} v The other vector.
-     * @returns {number}   The distance between the two vectors.
+     * Calculates the squared length of this Vec2 instance.
+     * @returns {number} The squared length of the Vec2 instance.
      */
-    distance(v) {
-        const tmp = [this.x - v.x, this.y - v.y]
-        return Math.sqrt(tmp[0] * tmp[0] + tmp[1] * tmp[1])
+    lengthSq() {
+        return this.x * this.x + this.y * this.y
     }
 
     /**
-     * Normalizes the vector (i.e. sets its length to 1).
-     * @returns {Vector} The normalized vector.
+     * Normalizes this Vec2 instance.
+     * @returns {Vec2} A new Vec2 instance with the normalized vector.
      */
     normalize() {
-        const scale = 1 / this.length()
-        this.x *= scale
-        this.y *= scale
-        return this
+        const invlength = 1 / Math.sqrt( this.x * this.x + this.y * this.y )
+        return new Vec2( this.x * invlength , this.y * invlength ) 
     }
 
     /**
-    * Sets the length of a vector.
-    * @param {number} targetLength The target length for the vector.
-    * @returns {Vector} The vector with its length set to the target length.
-    */
-    setLength(targetLength) {
-        const scale = targetLength / this.length()
-        this.x *= scale
-        this.y *= scale
-        return this
-    }
-
-
-    ///////////////////////////////////////////////////////////////////
-    // Static /////////////////////////////////////////////////////////
-    ///////////////////////////////////////////////////////////////////
-
-
-    /**
-     * Adds two vectors.
-     * @param {Vector} v1 The first vector.
-     * @param {Vector} v2 The second vector.
-     * @returns {Vector} The vector sum of the two vectors.
-    */
-    static add(v1, v2) {
-        return new Vector(v1.x + v2.x, v1.y + v2.y)
-    }
-
-    /**
-     * Subtracts a vector from another vector.
-     * @param {Vector} v1 The vector to subtract from.
-     * @param {Vector} v2 The vector to subtract.
-     * @returns {Vector} The vector difference of the two vectors.
-    */
-    static sub(v1, v2) {
-        return new Vector(v1.x - v2.x, v1.y - v2.y)
-    }
-    
-    /**
-     * Multiplies a vector by a scalar or a vector.
-     * @param {Vector} v The vector to multiply.
-     * @param {number|Vector} s The scalar or vector to multiply the vector by.
-     * @returns {Vector} The vector scaled by the scalar or multiplied component-wise by the vector.
-    */
-    static mult(v, s) {
-        if (typeof s === 'number')
-            return new Vector(v.x * s, v.y * s)
-        else
-            return new Vector(v.x * s.x, v.y * s.y)
-    }
-
-    /**
-     * Divides a vector by a scalar or a vector.
-     * @param {Vector} v The vector to divide.
-     * @param {number|Vector} s The scalar or vector to divide the vector by.
-     * @returns {Vector} The vector divided by the scalar or divided component-wise by the vector.
-    */
-    static div(v, s) {
-        if (typeof s === 'number') {
-            const inv = 1 / s
-            return new Vector(v.x * inv, v.y * inv)
-        } else 
-            return new Vector(v.x / s.x, v.y / s.y)
-    }
-
-
-
-    /**
-    * Computes the length of a vector.
-    * @param {Vector} v The vector to compute the length of.
-    * @returns {number} The length of the vector.
-    */
-    static length(v) {
-        return Math.sqrt(v.x * v.x + v.y * v.y)
-    }
-
-    /**
-    * Computes the distance between two vectors.
-    * @param {Vector} v1 The first vector.
-    * @param {Vector} v2 The second vector.
-    * @returns {number} The distance between the two vectors.
-    */
-    static distance(v1, v2) {
-        const tmp = [v1.x - v2.x, v1.y - v2.y]
-        return Math.sqrt(tmp[0] * tmp[0] + tmp[1] * tmp[1])
-    }
-
-    /**
-    * Normalizes a vector (i.e. sets its length to 1).
-    * @param {Vector} v The vector to normalize.
-    * @returns {Vector} The normalized vector.
-    */
-    static normalize(v) {
-        const scale = 1 / this.length(v)
-        return new Vector(v.x * scale, v.y * scale)
-    }
-
-    /**
-    * Sets the length of a vector.
-    * @param {Vector} v The vector to set the length of.
-    * @param {number} targetLength The target length for the vector.
-    * @returns {Vector} The vector with its length set to the target length.
-    */
-    static setLength(v, targetLength) {
-        const scale = targetLength / this.length(v)
-        return new Vector(v.x * scale, v.y * scale)
-    }
-
-    /**
-     * Generates a new object that can be used to create a vector pointing from one point to another.
-     * @param {Vector} point The point that the vector should originate from.
-     * @returns {{to: (point: Vector) => Vector}} An object containing the `to()` function that can be used to create the vector.
+     * Sets the length of this Vec2 instance.
+     * @param   {number} length The new length of the vector
+     * @returns {number} A new Vec2 instance with the specified length.
      */
-    static from(point) {
-        const a = point
-        return { to(point) {
-            return new Vector(point).sub(a)
+    setLength( length ) {
+        const scale = length / Math.sqrt( this.x * this.x + this.y * this.y )
+        return new Vec2( this.x * scale , this.y * scale ) 
+    }
+
+    // STATIC ///////////////////////////////////////////////////////
+
+    /**
+     * Calculates the dot product of two Vec2 instances.
+     * @param {Vec2} v1 - The first Vec2 instance.
+     * @param {Vec2} v2 - The second Vec2 instance.
+     * @returns {number} The dot product of the two Vec2 instances.
+     */
+    static dot( v1, v2 ) {
+        return v1.x * v2.x + v1.y * v2.y
+    }
+
+    /**
+     * Calculates the distance between two Vec2 instances.
+     * @param {Vec2} v1 - The first Vec2 instance.
+     * @param {Vec2} v2 - The second Vec2 instance.
+     * @returns {number} The distance between the two Vec2 instances.
+     */
+    static distance( v1, v2 ) {
+        const diffX = v1.x - v2.x
+        const diffY = v1.y - v2.y
+        return Math.sqrt( diffX * diffX + diffY * diffY )
+    }
+
+    /**
+     * Calculates the squared distance between two Vec2 instances.
+     * @param {Vec2} v1 - The first Vec2 instance.
+     * @param {Vec2} v2 - The second Vec2 instance.
+     * @returns {number} The squared distance between the two Vec2 instances.
+     */
+    static distanceSq( v1, v2 ) {
+        const diffX = v1.x - v2.x
+        const diffY = v1.y - v2.y
+        return diffX * diffX + diffY * diffY
+    }
+
+    /**
+     * Creates a vector from a start point to an end point.
+     * @param {Vec2} startPoint - The start point.
+     * @returns {{to: (endPoint: Vec2) => Vec2}}
+     */
+    static from( startPoint ) {
+        return { to( endPoint ) {
+            return new Vec2(endPoint).sub(startPoint)
         }}
     }
     /**
-     * Generates a new object that can be used to create a vector pointing from one point to another.
-     * @param {Vector} point The point that the vector should point to.
-     * @returns {{from: (point: Vector) => Vector}} An object containing the `from()` function that can be used to create the vector.
+     * Creates a vector from an end point to a start point.
+     * @param {Vec2} endPoint - The end point.
+     * @returns {{from: (startPoint: Vec2) => Vec2}}
      */
-    static to(point) {
-        const a = point 
-        return { from(point) {
-            return new Vector(a).sub(point)
+    static to( endPoint ) {
+        return { from( startPoint ) {
+                return new Vec2(endPoint).sub(startPoint)
         }}
     }
 
@@ -325,16 +265,16 @@ class SVGTemplate {
 
             /**
              * Calculates the control point for a cubic Bezier curve.
-             * @param {Vector} lastlast The previous point before the last point.
-             * @param {Vector} last The last point.
-             * @param {Vector} current The current point.
+             * @param {Vec2} lastlast The previous point before the last point.
+             * @param {Vec2} last The last point.
+             * @param {Vec2} current The current point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
-             * @returns {{point: Vector, guideVector: Vector}} An object containing the calculated control point and the guide vector used to calculate it.
+             * @returns {{point: Vec2, guideVector: Vec2}} An object containing the calculated control point and the guide vector used to calculate it.
             */
             controlPoint1(lastlast, last, current, guideDistance) {
-                guideDistance    ??= Vector.distance(last, current)
-                const guideVector  = Vector.setLength(Vector.from(lastlast).to(current), guideDistance / 3)
-                const controlPoint = Vector.add(last, guideVector)
+                guideDistance    ??= Vec2.distance(last, current)
+                const guideVector  = Vec2.setLength(Vec2.from(lastlast).to(current), guideDistance / 3)
+                const controlPoint = Vec2.add(last, guideVector)
                 return {
                     point: controlPoint,
                     guideVector: guideVector
@@ -343,16 +283,16 @@ class SVGTemplate {
 
             /**
              * Calculates the control point for a cubic Bezier curve.
-             * @param {Vector} last The last point.
-             * @param {Vector} current The current point.
-             * @param {Vector} next The next point.
+             * @param {Vec2} last The last point.
+             * @param {Vec2} current The current point.
+             * @param {Vec2} next The next point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
-             * @returns {{point: Vector, guideVector: Vector}} An object containing the calculated control point and the guide vector used to calculate it.
+             * @returns {{point: Vec2, guideVector: Vec2}} An object containing the calculated control point and the guide vector used to calculate it.
             */
             controlPoint2(last, current, next, guideDistance) {
-                guideDistance    ??= Vector.distance(last, current)
-                const guideVector  = Vector.setLength(Vector.from(next).to(last), guideDistance / 3)
-                const controlPoint = Vector.add(current, guideVector)
+                guideDistance    ??= Vec2.distance(last, current)
+                const guideVector  = Vec2.setLength(Vec2.from(next).to(last), guideDistance / 3)
+                const controlPoint = Vec2.add(current, guideVector)
                 return {
                     point: controlPoint,
                     guideVector: guideVector
@@ -361,21 +301,21 @@ class SVGTemplate {
 
             /**
              * Calculates the control points for a cubic Bezier curve.
-             * @param {Vector=} lastlast The previous point before the last point.
-             * @param {Vector}  last The last point.
-             * @param {Vector}  current The current point.
-             * @param {Vector=} next The next point.
+             * @param {Vec2=} lastlast The previous point before the last point.
+             * @param {Vec2}  last The last point.
+             * @param {Vec2}  current The current point.
+             * @param {Vec2=} next The next point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
              * @returns {[
-             *      {point: Vector, guideVector: Vector},
-             *      {point: Vector, guideVector: Vector}
+             *      {point: Vec2, guideVector: Vec2},
+             *      {point: Vec2, guideVector: Vec2}
              * ]} An array containing the two calculated control points and their corresponding guide vectors.
             */
             controlPoints(lastlast, last, current, next, guideDistance) {
                 if (!last || !current)  throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points")
                 if (!lastlast && !next) throw new Error("SVGTemplate.cubicBezier.controlPoints(): 'lastlast' and 'next' are undefined. At least one is required to calculate control points")
 
-                guideDistance ??= Vector.distance(last, current)
+                guideDistance ??= Vec2.distance(last, current)
 
                 if (lastlast && next) { // Both are defined, simply calculate control points
                     return [
@@ -387,7 +327,7 @@ class SVGTemplate {
                 if (next) { // 'lastlast' is not defined
                     const cp2 = this.controlPoint2(last, current, next, guideDistance)
                     const cp1 = {
-                        point: cp2.guideVector.mult(1.5).add(current).sub(last).div(3).add(last),
+                        point: cp2.guideVector.mul(1.5).add(current).sub(last).div(3).add(last),
                         guideVector: undefined
                     }
                     return [cp1, cp2]
@@ -396,7 +336,7 @@ class SVGTemplate {
                 if (lastlast) { // 'next' is not defined
                     const cp1 = this.controlPoint1(lastlast, last, current, guideDistance)
                     const cp2 = {
-                        point: cp1.guideVector.mult(1.5).add(last).sub(current).div(3).add(current),
+                        point: cp1.guideVector.mul(1.5).add(last).sub(current).div(3).add(current),
                         guideVector: undefined
                     }
                     return [cp1, cp2]
@@ -959,5 +899,5 @@ const SVG = Object.assign(
     path: SVGPath,
     arc: SVGArc,
 
-    vector: Vector,
+    vector: Vec2,
 })
