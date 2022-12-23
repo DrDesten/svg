@@ -849,33 +849,103 @@ class SVGGlobal {
      * The SVG element will take up the entire size of the parent element, with its elements positioned relatively within a [0, 100] range.
      * @param {string} parentQuerySelector - The query selector used to find the parent element for the SVG image.
      */
-    constructor(parentQuerySelector) {
-        // The initial size of the SVG element in pixels.
-        const initSize = 100
+    constructor( parentQuerySelector, fitMode = "stretch" ) {
 
-        // Get the parent element using the provided query selector.
-        const parent = document.querySelector(parentQuerySelector)
-        if (parent == null) {
+        this.parent = document.querySelector(parentQuerySelector)
+        if (this.parent == null) {
             throw new Error(`SVG(): Unable to bind parent. Query selector '${parentQuerySelector}' does not match a DOM element.`)
         }
 
-        // Create the SVG element.
         this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg")
-        this.svg.setAttribute("style", `width: ${initSize}px; height: ${initSize}px`)
 
-        // Change the SVG scale with the parent element size.
-        const resizeObserver = new ResizeObserver(entries => {
-            // Get the size of the parent element.
-            const entry = entries[0]
-            const size = [entry.target.clientWidth, entry.target.clientHeight]
-
-            // Scale the SVG element according to the parent size.
-            this.svg.style.transform = `translate(${(size[0] - initSize) / 2}px,${(size[1] - initSize) / 2}px) scale(${size[0] / 100},-${size[1] / 100})`
-        })
-        resizeObserver.observe(parent)
+        switch (fitMode) {
+            case undefined:
+            case "stretch":
+                this.parentAttachStretch()
+                break
+            case "cover":
+                this.parentAttachCover()
+                break
+            case "fit":
+                this.parentAttachFit()
+                break
+            case "fixed":
+                this.parentAttachFixed()
+                break
+        }
 
         // Add the SVG element to the parent element.
-        parent.appendChild(this.svg)
+        this.parent.appendChild( this.svg )
+    }
+
+    parentAttachStretch( initalSize = 100 ) {
+        // Set Attributes to have the target width and height
+        this.svg.setAttribute("style", `width: 100px; height: 100px`)
+
+        // Reset old resizeObserver, create new one
+        this.resizeObserver?.disconnect()
+        this.resizeObserver = new ResizeObserver(entries => {
+
+            // Get the size of the parent element.
+            const parent = entries[0]
+            const size   = { x: parent.target.clientWidth, y: parent.target.clientHeight }
+
+            // Scale the SVG element according to the parent size.
+            this.svg.style.transform = 
+                `translate(${(size.x - initalSize) / 2}px,${(size.y - initalSize) / 2}px)` +
+                `scale(${size.x / initalSize},-${size.y / initalSize})`
+            
+        })
+        this.resizeObserver.observe(this.parent)
+    }
+    parentAttachCover( initalSize = 100 ) {
+        // Set Attributes to have the target width and height
+        this.svg.setAttribute("style", `width: 100px; height: 100px;`)
+        this.parent.style.overflow = "hidden"
+
+        // Reset old resizeObserver, create new one
+        this.resizeObserver?.disconnect()
+        this.resizeObserver = new ResizeObserver(entries => {
+
+            // Get the size of the parent element.
+            const parent = entries[0]
+            const size   = { x: parent.target.clientWidth, y: parent.target.clientHeight }
+            const max    = Math.max( size.x, size.y )
+
+            // Scale the SVG element according to the parent size.
+            this.svg.style.transform = 
+                `translate(${(size.x - initalSize) / 2}px,${(size.y - initalSize) / 2}px)` +
+                `scale(${max / initalSize},-${max / initalSize})`
+            
+        })
+        this.resizeObserver.observe(this.parent)
+    }
+    parentAttachFit( initalSize = 100 ) {
+        // Set Attributes to have the target width and height
+        this.svg.setAttribute("style", `width: 100px; height: 100px;`)
+
+        // Reset old resizeObserver, create new one
+        this.resizeObserver?.disconnect()
+        this.resizeObserver = new ResizeObserver(entries => {
+
+            // Get the size of the parent element.
+            const parent = entries[0]
+            const size   = { x: parent.target.clientWidth, y: parent.target.clientHeight }
+            const min    = Math.min( size.x, size.y )
+
+            // Scale the SVG element according to the parent size.
+            this.svg.style.transform = 
+                `translate(${(size.x - initalSize) / 2}px,${(size.y - initalSize) / 2}px)` +
+                `scale(${min / initalSize},-${min / initalSize})`
+            
+        })
+        this.resizeObserver.observe(this.parent)
+    }
+    parentAttachFixed( initalSize = 100 ) {
+        // Set Attributes to have the target width and height
+        this.svg.setAttribute("style", `width: 100px; height: 100px;`)
+        // Reset old resizeObserver
+        this.resizeObserver?.disconnect()
     }
 
     /** 
@@ -888,6 +958,7 @@ class SVGGlobal {
         return this
     }
 }
+
 
 
 const SVG = Object.assign(
