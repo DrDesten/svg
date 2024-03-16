@@ -1,3 +1,5 @@
+import { SVG } from "../svg.js"
+
 const globalSVG = new SVG( "#canvas" )
 
 let swirl = new SVG.path().mode("bezier")
