@@ -1,3 +1,5 @@
+import { SVG } from "../svg.js"
+
 const globalSVG = new SVG( "#canvas", "cover" )
 const topSVG = new SVG( "#canvas-top", "cover" )
 
@@ -65,6 +67,7 @@ const lines = []
     }
 }
 
+let update
 globalSVG.add(...lines)
 requestAnimationFrame( update = function(time){
     lines.forEach( line => line.update(time) )

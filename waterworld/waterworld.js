@@ -1,3 +1,5 @@
+import { SVG } from "../svg.js"
+
 const globalSVG = new SVG( "#waterworld" )
 
 const numSegments = 200
@@ -48,6 +50,7 @@ for ( let i = 0; i < 7; i++ ) {
 }
 
 // Animate the paths
+let update
 requestAnimationFrame(update = function(time) {
     paths.forEach(path => path.update(time))
     requestAnimationFrame(update)
