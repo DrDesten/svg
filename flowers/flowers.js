@@ -1,3 +1,5 @@
+import { SVG } from "../svg.js"
+
 const globalSVG = new SVG( "#canvas" )
 
 const maxCorners = 16
