@@ -184,18 +184,6 @@ export class Vector2D extends Float64Array {
     }
 
     /**
-     * Calculates the dot product of this vector and another vector.
-     * @param {Vector2D} other - The vector to calculate the dot product with.
-     * @returns {number} The dot product of the two vectors.
-     */
-    dot( other ) {
-        if ( other instanceof Vector2D ) {
-            return this.x * other.x + this.y * other.y
-        }
-        return NaN
-    }
-
-    /**
      * Calculates the length (magnitude) of this vector.
      * @returns {number} The length of the vector.
      */
@@ -214,6 +202,20 @@ export class Vector2D extends Float64Array {
             return Vector2D.zero
         }
         return new Vector2D( this.x / length, this.y / length )
+    }
+
+
+    /**
+     * Calculates the dot product of two vectors.
+     * @param {Vector2D} a - The first vector.
+     * @param {Vector2D} b - The second vector.
+     * @returns {number} The dot product of the two vectors.
+     */
+    static dot( a, b ) {
+        if ( a instanceof Vector2D && b instanceof Vector2D ) {
+            return a.x * b.x + a.y * b.y
+        }
+        return NaN
     }
 
     /**

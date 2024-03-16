@@ -691,6 +691,7 @@ class SVGGlobal {
      * Returns a new SVG element, bound to a parent element specified by a query selector.
      * The SVG element will take up the entire size of the parent element, with its elements positioned relatively within a [0, 100] range.
      * @param {string} parentQuerySelector - The query selector used to find the parent element for the SVG image.
+     * @param {"stretch"|"cover"|"fit"|"fixed"} fitMode - The query selector used to find the parent element for the SVG image.
      */
     constructor( parentQuerySelector, fitMode = "stretch" ) {
 
