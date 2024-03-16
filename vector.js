@@ -55,47 +55,35 @@ export class Vector2D extends Float64Array {
      * The x component of the vector.
      * @type {number}
      */
-    get x() {
-        return this[0]
-    }
+    get x() { return this[0] }
     /**
      * Sets the x component of the vector.
      * @param {number} value - The new value for the x component.
      */
-    set x( value ) {
-        this[0] = value
-    }
+    set x( value ) { this[0] = value }
 
     /**
      * The y component of the vector.
      * @type {number}
      */
-    get y() {
-        return this[1]
-    }
+    get y() { return this[1] }
     /**
      * Sets the y component of the vector.
      * @param {number} value - The new value for the y component.
      */
-    set y( value ) {
-        this[1] = value
-    }
+    set y( value ) { this[1] = value }
 
     /**
      * Returns a new vector with components (x, x).
      * @type {Vector2D}
      */
-    get xx() {
-        return new Vector2D( this.x, this.x )
-    }
+    get xx() { return new Vector2D( this.x, this.x ) }
 
     /**
      * Returns a new vector with components (x, y).
      * @type {Vector2D}
      */
-    get xy() {
-        return new Vector2D( this.x, this.y )
-    }
+    get xy() { return new Vector2D( this.x, this.y ) }
     /**
      * Sets the x and y components of the vector to the values provided.
      * @param {Vector2D|number} value - The new vector or scalar value to set.
@@ -113,9 +101,7 @@ export class Vector2D extends Float64Array {
      * Returns a new vector with components (y, x).
      * @type {Vector2D}
      */
-    get yx() {
-        return new Vector2D( this.y, this.x )
-    }
+    get yx() { return new Vector2D( this.y, this.x ) }
     /**
      * Sets the y and x components of the vector to the values provided.
      * @param {Vector2D|number} value - The new vector or scalar value to set.
@@ -133,17 +119,13 @@ export class Vector2D extends Float64Array {
      * Returns a new vector with components (y, y).
      * @type {Vector2D}
      */
-    get yy() {
-        return new Vector2D( this.y, this.y )
-    }
+    get yy() { return new Vector2D( this.y, this.y ) }
 
     /**
      * Creates a new Vector2D instance with the same components as this vector.
      * @returns {Vector2D} A new Vector2D instance with the cloned components.
      */
-    clone() {
-        return new Vector2D( this.x, this.y )
-    }
+    clone() { return new Vector2D( this.x, this.y ) }
 
     /**
      * Adds a vector or scalar to this vector.
@@ -232,5 +214,33 @@ export class Vector2D extends Float64Array {
             return Vector2D.zero
         }
         return new Vector2D( this.x / length, this.y / length )
+    }
+
+    /**
+     * Linearly interpolates between two vectors.
+     * @param {Vector2D} a - The start vector.
+     * @param {Vector2D} b - The end vector.
+     * @param {number} t - The interpolation factor, typically between 0 and 1.
+     * @returns {Vector2D} The interpolated vector.
+     */
+    static lerp( a, b, t ) {
+        const x = a.x + ( b.x - a.x ) * t
+        const y = a.y + ( b.y - a.y ) * t
+        return new Vector2D( x, y )
+    }
+
+    /**
+     * Calculates the distance between two vectors.
+     * @param {Vector2D} a - The first vector.
+     * @param {Vector2D} b - The second vector.
+     * @returns {number} The distance between the two vectors.
+     */
+    static distance( a, b ) {
+        if ( a instanceof Vector2D && b instanceof Vector2D ) {
+            const dx = a.x - b.x
+            const dy = a.y - b.y
+            return Math.sqrt( dx * dx + dy * dy )
+        }
+        return NaN
     }
 }

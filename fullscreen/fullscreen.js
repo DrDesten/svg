@@ -1,4 +1,4 @@
-import { SVG } from "../svg.js"
+import { SVG, Vector2D as vec } from "../svg.js"
 
 const globalSVG = new SVG( "#canvas", "cover" )
 const topSVG = new SVG( "#canvas-top", "cover" )
@@ -17,13 +17,13 @@ const lines = []
         line.width( length / maxLength * maxWidth )
         line.opacity( (length / (maxLength + minLength) + minLength ) ** .1 )
 
-        const start = new SVG.vector( Math.random(), Math.random() ).mul(100)
-        const end   = start.add( new SVG.vector( Math.sin(angle), Math.cos(angle) ).mul(length) )
+        const start = new vec( Math.random(), Math.random() ).mul(100)
+        const end   = start.add( new vec( Math.sin(angle), Math.cos(angle) ).mul(length) )
 
         line.start(start.x, start.y).end(end.x, end.y)
 
         line.onUpdate((line, time) => {
-            const angleVector  = new SVG.vector( Math.sin(angle), Math.cos(angle) )
+            const angleVector  = new vec( Math.sin(angle), Math.cos(angle) )
             const offsetVector = angleVector.mul(time / 1000 * length )
             const lineStart = start.add( offsetVector )
             lineStart.x = lineStart.x % (100 + length) - length
@@ -47,13 +47,13 @@ const lines = []
         const length = Math.random() * (maxLength - minLength) + minLength
         line.width( length / maxLength * maxWidth )
 
-        const start = new SVG.vector( Math.random(), Math.random() ).mul(100)
-        const end   = start.add( new SVG.vector( Math.sin(angle), Math.cos(angle) ).mul(length) )
+        const start = new vec( Math.random(), Math.random() ).mul(100)
+        const end   = start.add( new vec( Math.sin(angle), Math.cos(angle) ).mul(length) )
 
         line.start(start.x, start.y).end(end.x, end.y)
 
         line.onUpdate((line, time) => {
-            const angleVector  = new SVG.vector( Math.sin(angle), Math.cos(angle) )
+            const angleVector  = new vec( Math.sin(angle), Math.cos(angle) )
             const offsetVector = angleVector.mul(time / 1000 * length )
             const lineStart = start.add( offsetVector )
             lineStart.x = lineStart.x % (100 + length) - length

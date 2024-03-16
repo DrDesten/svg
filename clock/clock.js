@@ -1,4 +1,4 @@
-import { SVG } from "../svg.js"
+import { SVG, Vector2D as vec } from "../svg.js"
 
 function mod( x, mod ) {
     return x > 0 ? x % mod : mod + x % mod

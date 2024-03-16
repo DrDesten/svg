@@ -1,4 +1,4 @@
-import { SVG } from "../svg.js"
+import { SVG, Vector2D as vec } from "../svg.js"
 
 const globalSVG = new SVG( "#canvas" )
 

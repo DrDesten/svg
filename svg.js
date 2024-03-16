@@ -1,181 +1,4 @@
-export class Vec2 {
-    /**
-     * @param {number|{x:number,y:number}|Vec2|[number,number]} vector - The x coordinate or an object or array with x and y coordinates.
-     * @param {number} y - The y coordinate.
-     */
-    constructor( vector = 0, y ) {
-        /** @type {number} x coordinate */
-        this.x
-        /** @type {number} y coordinate */
-        this.y
-
-        if ( typeof vector == "number" )
-            this.x = vector,
-                this.y = y ?? vector
-        else
-            this.x = vector.x ?? vector[0],
-                this.y = vector.y ?? vector[1] ?? this.x
-    }
-
-    /** @type {number} x coordinate */
-    get "0"() { return this.x }
-    /** @type {number} y coordinate */
-    get "1"() { return this.y }
-    /** @type {Vec2} */
-    get xx() { return new Vec2( this.x, this.x ) }
-    /** @type {Vec2} clones the vector */
-    get xy() { return new Vec2( this.x, this.y ) }
-    /** @type {Vec2} */
-    get yy() { return new Vec2( this.y, this.y ) }
-    /** @type {Vec2} */
-    get yx() { return new Vec2( this.y, this.x ) }
-
-    /**
-     * Adds the specified vector to this Vec2 instance.
-     * @param {number|Vec2} vector - A number or a Vec2 instance to add.
-     * @returns {Vec2} A new Vec2 instance with the result of the addition.
-     */
-    add( vector ) {
-        if ( typeof vector == "number" )
-            return new Vec2( this.x + vector, this.y + vector )
-        else
-            return new Vec2( this.x + vector.x, this.y + vector.y )
-    }
-
-    /**
-     * Subtracts the specified vector from this Vec2 instance.
-     * @param {number|Vec2} vector - A number or a Vec2 instance to subtract.
-     * @returns {Vec2} A new Vec2 instance with the result of the subtraction.
-     */
-    sub( vector ) {
-        if ( typeof vector == "number" )
-            return new Vec2( this.x - vector, this.y - vector )
-        else
-            return new Vec2( this.x - vector.x, this.y - vector.y )
-    }
-
-    /**
-     * Multiplies this Vec2 instance by the specified vector.
-     * @param {number|Vec2} vector - A number or a Vec2 instance to multiply by.
-     * @returns {Vec2} A new Vec2 instance with the result of the multiplication.
-     */
-    mul( vector ) {
-        if ( typeof vector == "number" )
-            return new Vec2( this.x * vector, this.y * vector )
-        else
-            return new Vec2( this.x * vector.x, this.y * vector.y )
-    }
-
-    /**
-     * Divides this Vec2 instance by the specified vector.
-     * @param {number|Vec2} vector - A number or a Vec2 instance to divide by.
-     * @returns {Vec2} A new Vec2 instance with the result of the division.
-     */
-    div( vector ) {
-        if ( typeof vector == "number" )
-            return new Vec2( this.x / vector, this.y / vector )
-        else
-            return new Vec2( this.x / vector.x, this.y / vector.y )
-    }
-
-
-    /**
-     * Calculates the length of this Vec2 instance.
-     * @returns {number} The length of the Vec2 instance.
-     */
-    length() {
-        return Math.sqrt( this.x * this.x + this.y * this.y )
-    }
-
-    /**
-     * Calculates the squared length of this Vec2 instance.
-     * @returns {number} The squared length of the Vec2 instance.
-     */
-    lengthSq() {
-        return this.x * this.x + this.y * this.y
-    }
-
-    /**
-     * Normalizes this Vec2 instance.
-     * @returns {Vec2} A new Vec2 instance with the normalized vector.
-     */
-    normalize() {
-        const invlength = 1 / Math.sqrt( this.x * this.x + this.y * this.y )
-        return new Vec2( this.x * invlength, this.y * invlength )
-    }
-
-    /**
-     * Sets the length of this Vec2 instance.
-     * @param   {number} length The new length of the vector
-     * @returns {number} A new Vec2 instance with the specified length.
-     */
-    setLength( length ) {
-        const scale = length / Math.sqrt( this.x * this.x + this.y * this.y )
-        return new Vec2( this.x * scale, this.y * scale )
-    }
-
-    // STATIC ///////////////////////////////////////////////////////
-
-    /**
-     * Calculates the dot product of two Vec2 instances.
-     * @param {Vec2} v1 - The first Vec2 instance.
-     * @param {Vec2} v2 - The second Vec2 instance.
-     * @returns {number} The dot product of the two Vec2 instances.
-     */
-    static dot( v1, v2 ) {
-        return v1.x * v2.x + v1.y * v2.y
-    }
-
-    /**
-     * Calculates the distance between two Vec2 instances.
-     * @param {Vec2} v1 - The first Vec2 instance.
-     * @param {Vec2} v2 - The second Vec2 instance.
-     * @returns {number} The distance between the two Vec2 instances.
-     */
-    static distance( v1, v2 ) {
-        const diffX = v1.x - v2.x
-        const diffY = v1.y - v2.y
-        return Math.sqrt( diffX * diffX + diffY * diffY )
-    }
-
-    /**
-     * Calculates the squared distance between two Vec2 instances.
-     * @param {Vec2} v1 - The first Vec2 instance.
-     * @param {Vec2} v2 - The second Vec2 instance.
-     * @returns {number} The squared distance between the two Vec2 instances.
-     */
-    static distanceSq( v1, v2 ) {
-        const diffX = v1.x - v2.x
-        const diffY = v1.y - v2.y
-        return diffX * diffX + diffY * diffY
-    }
-
-    /**
-     * Creates a vector from a start point to an end point.
-     * @param {Vec2} startPoint - The start point.
-     * @returns {{to: (endPoint: Vec2) => Vec2}}
-     */
-    static from( startPoint ) {
-        return {
-            to( endPoint ) {
-                return new Vec2( endPoint ).sub( startPoint )
-            }
-        }
-    }
-    /**
-     * Creates a vector from an end point to a start point.
-     * @param {Vec2} endPoint - The end point.
-     * @returns {{from: (startPoint: Vec2) => Vec2}}
-     */
-    static to( endPoint ) {
-        return {
-            from( startPoint ) {
-                return new Vec2( endPoint ).sub( startPoint )
-            }
-        }
-    }
-
-}
+import { Vector2D as vec } from "./vector.js"
 
 class SVGTemplate {
     /** @param {string} type */
@@ -269,15 +92,15 @@ class SVGTemplate {
 
             /**
              * Calculates the control point for a cubic Bezier curve.
-             * @param {Vec2} lastlast The previous point before the last point.
-             * @param {Vec2} last The last point.
-             * @param {Vec2} current The current point.
+             * @param {vec} lastlast The previous point before the last point.
+             * @param {vec} last The last point.
+             * @param {vec} current The current point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
-             * @returns {{point: Vec2, guideVector: Vec2}} An object containing the calculated control point and the guide vector used to calculate it.
+             * @returns {{point: vec, guideVector: vec}} An object containing the calculated control point and the guide vector used to calculate it.
             */
             controlPoint1( lastlast, last, current, guideDistance ) {
-                guideDistance ??= Vec2.distance( last, current )
-                const guideVector = Vec2.from( lastlast ).to( current ).setLength( guideDistance / 3 )
+                guideDistance ??= vec.distance( last, current )
+                const guideVector = current.sub( lastlast ).normalize().mul( guideDistance / 3 )
                 const controlPoint = last.add( guideVector )
                 return {
                     point: controlPoint,
@@ -287,15 +110,15 @@ class SVGTemplate {
 
             /**
              * Calculates the control point for a cubic Bezier curve.
-             * @param {Vec2} last The last point.
-             * @param {Vec2} current The current point.
-             * @param {Vec2} next The next point.
+             * @param {vec} last The last point.
+             * @param {vec} current The current point.
+             * @param {vec} next The next point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
-             * @returns {{point: Vec2, guideVector: Vec2}} An object containing the calculated control point and the guide vector used to calculate it.
+             * @returns {{point: vec, guideVector: vec}} An object containing the calculated control point and the guide vector used to calculate it.
             */
             controlPoint2( last, current, next, guideDistance ) {
-                guideDistance ??= Vec2.distance( last, current )
-                const guideVector = Vec2.from( next ).to( last ).setLength( guideDistance / 3 )
+                guideDistance ??= vec.distance( last, current )
+                const guideVector = last.sub( next ).normalize().mul( guideDistance / 3 )
                 const controlPoint = current.add( guideVector )
                 return {
                     point: controlPoint,
@@ -305,21 +128,21 @@ class SVGTemplate {
 
             /**
              * Calculates the control points for a cubic Bezier curve.
-             * @param {Vec2=} lastlast The previous point before the last point.
-             * @param {Vec2}  last The last point.
-             * @param {Vec2}  current The current point.
-             * @param {Vec2=} next The next point.
+             * @param {vec=} lastlast The previous point before the last point.
+             * @param {vec}  last The last point.
+             * @param {vec}  current The current point.
+             * @param {vec=} next The next point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
              * @returns {[
-             *      {point: Vec2, guideVector: Vec2},
-             *      {point: Vec2, guideVector: Vec2}
+             *      {point: vec, guideVector: vec},
+             *      {point: vec, guideVector: vec}
              * ]} An array containing the two calculated control points and their corresponding guide vectors.
             */
             controlPoints( lastlast, last, current, next, guideDistance ) {
                 if ( !last || !current ) throw new Error( "SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points" )
                 if ( !lastlast && !next ) throw new Error( "SVGTemplate.cubicBezier.controlPoints(): 'lastlast' and 'next' are undefined. At least one is required to calculate control points" )
 
-                guideDistance ??= Vec2.distance( last, current )
+                guideDistance ??= vec.distance( last, current )
 
                 if ( lastlast && next ) { // Both are defined, simply calculate control points
                     return [
@@ -479,7 +302,7 @@ class SVGArc extends SVGTemplate {
 
 }
 
-class PathPoint extends Vec2 {
+class PathPoint extends vec {
     /**
      * @param {'line'|'cubic bezier'|'quadratic bezier'|'close'|'custom'} type 
      * @param {number} x 
@@ -489,8 +312,8 @@ class PathPoint extends Vec2 {
     constructor( type, x, y, custom ) {
         super( x, y )
         this.type = type
-        if ( this.type === "custom" ) { 
-            this.custom = custom 
+        if ( this.type === "custom" ) {
+            this.custom = custom
         }
     }
 }
@@ -539,8 +362,8 @@ class SVGPath extends SVGTemplate {
     point( x, y ) {
         this.pathPoints.push(
             this.pathMode == "custom" ?
-                new PathPoint(this.pathMode, NaN, NaN, x) :
-                new PathPoint(this.pathMode, x, y ?? x)
+                new PathPoint( this.pathMode, NaN, NaN, x ) :
+                new PathPoint( this.pathMode, x, y ?? x )
         )
         return this
     }
@@ -549,7 +372,7 @@ class SVGPath extends SVGTemplate {
      * Closes the path.
      */
     close() {
-        this.pathPoints.push( new PathPoint("close",  this.pathPoints[0]?.x,  this.pathPoints[0]?.y ))
+        this.pathPoints.push( new PathPoint( "close", this.pathPoints[0]?.x, this.pathPoints[0]?.y ) )
         this.closed = true
         return this
     }
@@ -989,6 +812,5 @@ export const SVG = Object.assign(
     line: SVGLine,
     path: SVGPath,
     arc: SVGArc,
-
-    vector: Vec2,
 } )
+export const Vector2D = vec
