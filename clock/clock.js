@@ -1,3 +1,5 @@
+import { SVG } from "../svg.js"
+
 function mod( x, mod ) {
     return x > 0 ? x % mod : mod + x % mod
 }
@@ -38,7 +40,7 @@ function fadeInSmoothest( fadeTime , startDelay = 0 ) {
 
 
 const globalSVG = new SVG( "#clock" )
-colors = ["#213","#6de","#8fb"] 
+const colors = ["#213","#6de","#8fb"] 
 
 const timewarp = 1
 const handles = [
@@ -122,7 +124,7 @@ for ( let i = 0; i < hourLineCount; i++ ) {
 }
 
 
-
+let update
 globalSVG.add(...handleLines, ...handles)
 requestAnimationFrame(update = function(time) {
     for (const handle of handles)     handle.update(time)
