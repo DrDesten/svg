@@ -75,14 +75,10 @@ class SVGTemplate {
      * Returns a point on a circle given an angle, radius and center  
      * @param {number} angle 
      * @param {number} radius 
-     * @param {[number,number]|{x:number,y:number}} center 
+     * @param {vec} center 
      **/
-    static circlePoint( angle, radius = 1, center = [0, 0] ) {
-        return {
-            x: Math.sin( angle ) * radius + center[0] ?? center.x,
-            y: Math.cos( angle ) * radius + center[1] ?? center.y,
-            asArray() { return [this.x, this.y] }
-        }
+    static circlePoint( angle, radius = 1, center = vec.zero ) {
+        return vec.fromAngle( angle ).mul( radius ).add( center )
     }
 
     // Curves ////////////////////////////////////////////////
@@ -207,7 +203,7 @@ class SVGArc extends SVGTemplate {
         this.setDefaults( SVGTemplate.lineDefaults, opts )
 
         /** @private */
-        this.centerPosition = [0, 0]
+        this.centerPosition = vec.zero
         /** @private */
         this.startAngle = 0
         /** @private */
@@ -222,7 +218,7 @@ class SVGArc extends SVGTemplate {
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
     center( x, y ) {
-        this.centerPosition = [x, y ?? x]
+        this.centerPosition = new vec( x, y ?? x )
         return this
     }
 
@@ -289,7 +285,7 @@ class SVGArc extends SVGTemplate {
         // Set the ellipse rotation to 0.
         path += `0 `
         // Set the angle flag to true (1) if the angular length is larger than 180 degrees.
-        path += `${+( ( angularLength > -0.5 && angularLength < 0 ) || ( angularLength > 0.5 && angularLength < 1 ) )} `
+        path += `${+!( ( angularLength > -0.5 && angularLength < 0 ) || ( angularLength > 0.5 && angularLength < 1 ) )} `
         // Set the sweep flag to 0.
         path += `0 `
         // Set the end position of the arc.
@@ -466,15 +462,15 @@ class SVGLine extends SVGTemplate {
         this.coordinateMode = "point"
         /** @private */
         this.angleMode = {
-            center: [0, 0],
+            center: vec.zero,
             angle: 0,
             startRadius: 0,
             endRadius: 0,
         }
         /** @private */
         this.pointMode = {
-            start: [0, 0],
-            end: [0, 0],
+            start: vec.zero,
+            end: vec.zero,
         }
     }
 
@@ -482,12 +478,12 @@ class SVGLine extends SVGTemplate {
     mode( coordinateMode ) { return this.coordinateMode = coordinateMode, this }
 
     /** @param {number} x @param {number=} y */
-    start( x, y ) { return this.pointMode.start = [x, y ?? x], this.set( "x1", x ).set( "y1", y ) }
+    start( x, y ) { return this.pointMode.start = new vec( x, y ?? x ), this.set( "x1", x ).set( "y1", y ) }
     /** @param {number} x @param {number=} y */
-    end( x, y ) { return this.pointMode.end = [x, y ?? x], this.set( "x2", x ).set( "y2", y ) }
+    end( x, y ) { return this.pointMode.end = new vec( x, y ?? x ), this.set( "x2", x ).set( "y2", y ) }
 
     /** @param {number} x @param {number=} y */
-    center( x, y ) { return this.angleMode.center = [x, y ?? x], this }
+    center( x, y ) { return this.angleMode.center = new vec( x, y ?? x ), this }
     /** @param {number} a */
     angle( a ) { return this.angleMode.angle = a, this }
     /** @param {number} a */
@@ -505,8 +501,8 @@ class SVGLine extends SVGTemplate {
     update( millisecondsSinceInitialisation = Infinity ) {
         if ( this.updateCallback != undefined ) this.updateCallback.call( this, this, millisecondsSinceInitialisation )
         if ( this.coordinateMode == "point" )
-            return this.set( "x1", this.pointMode.start[0] ).set( "y1", this.pointMode.start[1] )
-                .set( "x2", this.pointMode.end[0] ).set( "y2", this.pointMode.end[1] )
+            return this.set( "x1", this.pointMode.start.x ).set( "y1", this.pointMode.start.y )
+                .set( "x2", this.pointMode.end.x ).set( "y2", this.pointMode.end.y )
 
         if ( this.coordinateMode == "angle" ) {
 
@@ -529,7 +525,7 @@ class SVGCircle extends SVGTemplate {
         this.setDefaults( SVGTemplate.fillDefaults, opts )
 
         /** @private */
-        this.centerPosition = [0, 0]
+        this.centerPosition = vec.zero
         /** @private */
         this.circularRadius = 0
     }
@@ -539,7 +535,7 @@ class SVGCircle extends SVGTemplate {
      * @param {number} x - The x coordinate of the center.
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
-    center( x, y ) { return this.centerPosition = [x, y ?? x], this }
+    center( x, y ) { return this.centerPosition = new vec( x, y ?? x ), this }
     /** 
      * Sets the radius of the circle.
      * @param {number} r - The radius of the circle.
@@ -555,7 +551,7 @@ class SVGCircle extends SVGTemplate {
         if ( this.updateCallback != undefined ) this.updateCallback.call( this, this, millisecondsSinceInitialisation )
 
         // Update the SVG circle element to reflect the current center and radius values.
-        this.set( "cx", this.centerPosition[0] ).set( "cy", this.centerPosition[1] ).set( "r", this.circularRadius )
+        this.set( "cx", this.centerPosition.x ).set( "cy", this.centerPosition.y ).set( "r", this.circularRadius )
         return this
     }
 }
@@ -567,9 +563,9 @@ class SVGEllipse extends SVGTemplate {
         this.setDefaults( SVGTemplate.fillDefaults, opts )
 
         /** @private */
-        this.centerPosition = [0, 0]
+        this.centerPosition = vec.zero
         /** @private */
-        this.ellipseRadii = [0, 0]
+        this.ellipseRadii = vec.zero
     }
 
     /** 
@@ -577,13 +573,13 @@ class SVGEllipse extends SVGTemplate {
      * @param {number} x - The x coordinate of the center.
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
-    center( x, y ) { return this.centerPosition = [x, y ?? x], this }
+    center( x, y ) { return this.centerPosition = new vec( x, y ?? x ), this }
     /** 
      * Sets the radius of the circle.
      * @param {number} rx - The x-radius of the ellipse.
      * @param {number=} ry - The y-radius of the ellipse. If not provided, the x-radius is used for both x and y.
      */
-    radius( rx, ry ) { return this.ellipseRadii = [rx, ry ?? rx], this }
+    radius( rx, ry ) { return this.ellipseRadii = new vec( rx, ry ?? rx ), this }
 
     /** 
      * Updates the circle to reflect any changes to its properties.
@@ -594,10 +590,10 @@ class SVGEllipse extends SVGTemplate {
         if ( this.updateCallback != undefined ) this.updateCallback.call( this, this, millisecondsSinceInitialisation )
 
         // Update the SVG ellipse element to reflect the current center and radius values.
-        this.set( "cx", this.centerPosition[0] )
-            .set( "cy", this.centerPosition[1] )
-            .set( "rx", this.ellipseRadii[0] )
-            .set( "ry", this.ellipseRadii[1] )
+        this.set( "cx", this.centerPosition.x )
+            .set( "cy", this.centerPosition.y )
+            .set( "rx", this.ellipseRadii.x )
+            .set( "ry", this.ellipseRadii.y )
         return this
     }
 }
@@ -611,11 +607,11 @@ class SVGRectangle extends SVGTemplate {
         /** @private */
         this.coordinateMode = "corner"
         /** @private */
-        this.rectangleDimensions = [0, 0]
+        this.rectangleDimensions = vec.zero
         /** @private */
-        this.rectanglePosition = [0, 0]
+        this.rectanglePosition = vec.zero
         /** @private */
-        this.borderRadii = [0, 0]
+        this.borderRadii = vec.zero
     }
 
     /**
@@ -629,21 +625,21 @@ class SVGRectangle extends SVGTemplate {
      * @param {number} width - The width of the rectangle.
      * @param {number=} height - The height of the rectangle. If not provided, the width is used for both width and height.
      */
-    dimensions( width, height ) { return this.rectangleDimensions = [width, height ?? width], this }
+    dimensions( width, height ) { return this.rectangleDimensions = new vec( width, height ?? width ), this }
 
     /**
      * Sets the position of the rectangle.
      * @param {number} x - The x coordinate of the rectangle.
      * @param {number=} y - The y coordinate of the rectangle. If not provided, the x coordinate is used for both x and y.
      */
-    position( x, y ) { return this.rectanglePosition = [x, y ?? x], this }
+    position( x, y ) { return this.rectanglePosition = new vec( x, y ?? x ), this }
 
     /**
      * Sets the border radii of the rectangle.
      * @param {number} rx - The x coordinate of the border radius.
      * @param {number=} ry - The y coordinate of the border radius. If not provided, the x coordinate is used for both x and y.
      */
-    radius( rx, ry ) { return this.borderRadii = [rx, ry ?? rx], this }
+    radius( rx, ry ) { return this.borderRadii = new vec( rx, ry ?? rx ), this }
 
     /** 
      * Updates the rectangle to reflect any changes to its properties.
@@ -662,8 +658,8 @@ class SVGRectangle extends SVGTemplate {
                 .set( "y", y - height / 2 )
                 .set( "width", width )
                 .set( "height", height )
-                .set( "rx", this.borderRadii[0] )
-                .set( "ry", this.borderRadii[1] )
+                .set( "rx", this.borderRadii.x )
+                .set( "ry", this.borderRadii.y )
 
         } else if ( this.coordinateMode == "corner" ) {
 
@@ -674,8 +670,8 @@ class SVGRectangle extends SVGTemplate {
                 .set( "y", y )
                 .set( "width", width )
                 .set( "height", height )
-                .set( "rx", this.borderRadii[0] )
-                .set( "ry", this.borderRadii[1] )
+                .set( "rx", this.borderRadii.x )
+                .set( "ry", this.borderRadii.y )
 
         } else {
             // If the coordinate mode is not recognized, throw an error.
@@ -753,7 +749,7 @@ class SVGGlobal {
 
             // Get the size of the parent element.
             const parent = entries[0]
-            const size = { x: parent.target.clientWidth, y: parent.target.clientHeight }
+            const size = new vec( parent.target.clientWidth, parent.target.clientHeight )
             const max = Math.max( size.x, size.y )
 
             // Scale the SVG element according to the parent size.
@@ -774,7 +770,7 @@ class SVGGlobal {
 
             // Get the size of the parent element.
             const parent = entries[0]
-            const size = { x: parent.target.clientWidth, y: parent.target.clientHeight }
+            const size = new vec( parent.target.clientWidth, parent.target.clientHeight )
             const min = Math.min( size.x, size.y )
 
             // Scale the SVG element according to the parent size.
@@ -805,7 +801,7 @@ class SVGGlobal {
 
 
 
-export const SVG = Object.assign(
+export const SVG = Object.freeze( Object.assign(
     SVGGlobal, {
     rect: SVGRectangle,
     circle: SVGCircle,
@@ -813,5 +809,5 @@ export const SVG = Object.assign(
     line: SVGLine,
     path: SVGPath,
     arc: SVGArc,
-} )
+} ) )
 export const Vector2D = vec

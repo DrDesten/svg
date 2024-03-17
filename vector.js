@@ -31,13 +31,40 @@ export class Vector2D extends Float64Array {
                 return new Vector2D( input.x, input.y )
             }
             if ( typeof input === 'number' || typeof input === 'bigint' ) {
-                return new Vector2D( Number( input ), Number( input ) )
+                return new Vector2D( Number( input ) )
             }
         }
         if ( arguments.length === 2 ) {
             return new Vector2D( Number( x ), Number( y ) )
         }
         return Vector2D.NaN
+    }
+
+    /**
+     * Creates a unit length vector from an angle.
+     * @param {number} angle - The angle in radians.
+     * @returns {Vector2D} A new Vector2D instance with the unit length vector components.
+     */
+    static fromAngle( angle ) {
+        return new Vector2D(
+            Math.cos( angle ),
+            Math.sin( angle )
+        )
+    }
+
+    /**
+     * Creates a random vector within the unit circle.
+     * @returns {Vector2D} A new Vector2D instance with the random components.
+     */
+    static random() {
+        return Vector2D.randomAngle().mul( sqrt( Math.random() ) )
+    }
+    /**
+     * Creates a unit length vector from a random angle.
+     * @returns {Vector2D} A new Vector2D instance with the random unit length vector components.
+     */
+    static randomAngle() {
+        return Vector2D.fromAngle( Math.random() * 2 * Math.PI )
     }
 
     /**
