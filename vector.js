@@ -9,33 +9,6 @@ export class Vector2D extends Float64Array {
     static get NaN() { return new Vector2D( NaN, NaN ) }
 
     /**
-     * Creates a new Vector2D instance from various types of inputs.
-     * @param {any[]|{x:number,y:number}|Vector2D|number|bigint} x - The input data for creating the vector, or the x component if two arguments are provided.
-     * @param {number|bigint} y - The y component of the vector if two arguments are provided.
-     * @returns {Vector2D} A new Vector2D instance.
-     */
-    static new( x, y ) {
-        if ( x === undefined && y === undefined ) {
-            return Vector2D.zero
-        }
-        if ( y === undefined ) {
-            if ( x instanceof Vector2D ) {
-                return new Vector2D( x.x, x.y )
-            }
-            if ( Array.isArray( x ) ) {
-                return new Vector2D( Number( x[0] ), Number( x[1] ) )
-            }
-            if ( typeof x === 'object' ) {
-                return new Vector2D( Number( x.x ), Number( x.y ) )
-            }
-            if ( typeof x === 'number' || typeof x === 'bigint' ) {
-                return new Vector2D( Number( x ), Number( x ) )
-            }
-        }
-        return new Vector2D( Number( x ), Number( y ) )
-    }
-
-    /**
      * Creates a unit length vector from an angle.
      * @param {number} angle - The angle in radians.
      * @returns {Vector2D} A new Vector2D instance with the unit length vector components.
@@ -82,6 +55,33 @@ export class Vector2D extends Float64Array {
      */
     static randomAngle() {
         return Vector2D.fromAngle( Math.random() * 2 * Math.PI )
+    }
+
+    /**
+     * Creates a new Vector2D instance from various types of inputs.
+     * @param {any[]|{x:number,y:number}|Vector2D|number|bigint} x - The input data for creating the vector, or the x component if two arguments are provided.
+     * @param {number|bigint} y - The y component of the vector if two arguments are provided.
+     * @returns {Vector2D} A new Vector2D instance.
+     */
+     static new( x, y ) {
+        if ( x === undefined && y === undefined ) {
+            return Vector2D.zero
+        }
+        if ( y === undefined ) {
+            if ( x instanceof Vector2D ) {
+                return new Vector2D( x.x, x.y )
+            }
+            if ( Array.isArray( x ) ) {
+                return new Vector2D( Number( x[0] ), Number( x[1] ) )
+            }
+            if ( typeof x === 'object' ) {
+                return new Vector2D( Number( x.x ), Number( x.y ) )
+            }
+            if ( typeof x === 'number' || typeof x === 'bigint' ) {
+                return new Vector2D( Number( x ), Number( x ) )
+            }
+        }
+        return new Vector2D( Number( x ), Number( y ) )
     }
 
     /**
