@@ -32,8 +32,8 @@ class Boid {
     /** @param {vec} pos */
     constructor( pos ) {
         this.pos = pos
-        this.vel = vec.new()
-        this.acc = vec.new()
+        this.vel = vec.zero
+        this.acc = vec.zero
     }
 }
 
@@ -81,10 +81,10 @@ function tick() {
         color[1] *= red / 2
         color[2] *= red
 
-        let blue = boid.vel.length() * red 
+        /* let blue = boid.vel.length() * red 
         blue = blue ** -2
         color[0] *= blue
-        color[1] *= blue
+        color[1] *= blue */
 
         ele.start( ...mappedPos ).end( ...mappedVel ).color(`rgb(${color[0]}, ${color[1]}, ${color[2]})`).opacity( opacity ).update()
     }

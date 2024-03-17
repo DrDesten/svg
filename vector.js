@@ -10,34 +10,29 @@ export class Vector2D extends Float64Array {
 
     /**
      * Creates a new Vector2D instance from various types of inputs.
-     * If the input is invalid or no arguments are provided, a (0, 0) vector is returned.
-     * @param {Array|Object|Vector2D|number|bigint} x - The input data for creating the vector, or the x component if two arguments are provided.
+     * @param {any[]|{x:number,y:number}|Vector2D|number|bigint} x - The input data for creating the vector, or the x component if two arguments are provided.
      * @param {number|bigint} y - The y component of the vector if two arguments are provided.
      * @returns {Vector2D} A new Vector2D instance.
      */
     static new( x, y ) {
-        if ( arguments.length === 0 ) {
+        if ( x === undefined && y === undefined ) {
             return Vector2D.zero
         }
-        if ( arguments.length === 1 ) {
-            const input = x
-            if ( input instanceof Vector2D ) {
-                return new Vector2D( input.x, input.y )
+        if ( y === undefined ) {
+            if ( x instanceof Vector2D ) {
+                return new Vector2D( x.x, x.y )
             }
-            if ( Array.isArray( input ) ) {
-                return new Vector2D( input[0], input[1] )
+            if ( Array.isArray( x ) ) {
+                return new Vector2D( Number( x[0] ), Number( x[1] ) )
             }
-            if ( typeof input === 'object' && 'x' in input && 'y' in input ) {
-                return new Vector2D( input.x, input.y )
+            if ( typeof x === 'object' ) {
+                return new Vector2D( Number( x.x ), Number( x.y ) )
             }
-            if ( typeof input === 'number' || typeof input === 'bigint' ) {
-                return new Vector2D( Number( input ) )
+            if ( typeof x === 'number' || typeof x === 'bigint' ) {
+                return new Vector2D( Number( x ), Number( x ) )
             }
         }
-        if ( arguments.length === 2 ) {
-            return new Vector2D( Number( x ), Number( y ) )
-        }
-        return Vector2D.NaN
+        return new Vector2D( Number( x ), Number( y ) )
     }
 
     /**
@@ -53,10 +48,32 @@ export class Vector2D extends Float64Array {
     }
 
     /**
-     * Creates a random vector within the unit circle.
+     * Creates a random vector with components in the range [-1, 1].
      * @returns {Vector2D} A new Vector2D instance with the random components.
      */
     static random() {
+        return new Vector2D(
+            Math.random() * 2 - 1,
+            Math.random() * 2 - 1
+        )
+    }
+    /**
+     * Creates a random vector with components in the range [min, max].
+     * @param {Vector2D} min - The minimum bound vector.
+     * @param {Vector2D} max - The maximum bound vector.
+     * @returns {Vector2D} A new Vector2D instance with the random components.
+     */
+    static randomRect( min, max ) {
+        return new Vector2D(
+            Math.random() * ( max.x - min.x ) + min.x,
+            Math.random() * ( max.y - min.y ) + min.y
+        )
+    }
+    /**
+     * Creates a random vector within the unit circle.
+     * @returns {Vector2D} A new Vector2D instance with the random components.
+     */
+    static randomCircle() {
         return Vector2D.randomAngle().mul( sqrt( Math.random() ) )
     }
     /**
