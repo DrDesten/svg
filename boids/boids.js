@@ -1,10 +1,10 @@
 import { SVG, Vector2D as vec } from "../svg.js"
 
-const globalSVG = new SVG( "#canvas", "cover" )
+const globalSVG = new SVG( "#canvas", "fit" )
 
 let mousePressed = 0
-const mousePos = vec.new()
-const mappedMousePos = vec.new()
+const mousePos = vec.zero
+const mappedMousePos = vec.zero
 
 document.addEventListener( "mousemove", e => {
     mousePos.xy = new vec( e.clientX, e.clientY )
@@ -39,7 +39,7 @@ class Boid {
 
 const count = 1000
 const size = 0.3
-const boids = Array.from( { length: count } ).map( () => new Boid( new vec( Math.random(), Math.random() ) ) )
+const boids = Array.from( { length: count } ).map( () => new Boid( vec.random().mul(.5).add(.5) ) )
 const elements = Array.from( { length: count } ).map( () => new SVG.line().width( size ) )
 
 console.log( boids )
@@ -49,7 +49,7 @@ function tick() {
     for ( const boid of boids ) {
         boid.acc = vec.zero
 
-        boid.acc = boid.acc.add( new vec( Math.random(), Math.random() ).sub( .5 ).mul( 0.001 ) )
+        boid.acc = boid.acc.add( vec.randomCircle().mul( 0.001 ) )
 
         const mouseDistance = vec.distance( mappedMousePos, boid.pos )
 
@@ -74,11 +74,11 @@ function tick() {
         let mappedVel = mappedPos.sub( boid.vel.mul( 100 ) )
 
         let opacity = Math.sqrt( 1 / ( 1 + vec.distance( mappedPos, mappedVel ) / size ) )
-        let color = [255,255,255]
+        let color = [255, 255, 255]
 
-        let red = boid.vel.normalize().sub(boid.acc.normalize()).length() * boid.acc.length() ** 2
-        red = (red * 10000 + 1) ** -2
-        color[1] *= red / 2
+        let red = boid.vel.normalize().sub( boid.acc.normalize() ).length() * boid.acc.length() ** 2
+        red = ( red * 10000 + 1 ) ** -2
+        color[1] *= red
         color[2] *= red
 
         /* let blue = boid.vel.length() * red 
@@ -86,7 +86,7 @@ function tick() {
         color[0] *= blue
         color[1] *= blue */
 
-        ele.start( ...mappedPos ).end( ...mappedVel ).color(`rgb(${color[0]}, ${color[1]}, ${color[2]})`).opacity( opacity ).update()
+        ele.start( ...mappedPos ).end( ...mappedVel ).color( `rgb(${color[0]}, ${color[1]}, ${color[2]})` ).opacity( opacity ).update()
     }
 
 }

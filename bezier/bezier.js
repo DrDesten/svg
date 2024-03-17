@@ -11,7 +11,7 @@ let swirl = new SVG.path().mode( "bezier" ).color( "#800" )
 for ( let i = 0; i < points; i++ ) {
     let factor = (i / points) ** 1.5
     let angle = factor * revolutions * Math.PI * 2
-    let v = new vec( Math.sin( angle ), Math.cos( angle ) ).mul( scale * factor ).add( center )
+    let v = vec.fromAngle(angle).mul( scale * factor ).add( center )
     swirl.point( ...v )
 }
 swirl.update()

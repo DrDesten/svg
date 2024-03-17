@@ -4,7 +4,7 @@ const globalSVG = new SVG( "#waterworld" )
 
 const numSegments = 200
 const radius = 40
-const center = new vec( 50, 50 )
+const center = vec.new( 50 )
 
 // An array to store the paths
 const paths = []

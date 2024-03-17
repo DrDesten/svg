@@ -74,7 +74,7 @@ export class Vector2D extends Float64Array {
      * @returns {Vector2D} A new Vector2D instance with the random components.
      */
     static randomCircle() {
-        return Vector2D.randomAngle().mul( sqrt( Math.random() ) )
+        return Vector2D.randomAngle().mul( Math.sqrt( Math.random() ) )
     }
     /**
      * Creates a unit length vector from a random angle.
