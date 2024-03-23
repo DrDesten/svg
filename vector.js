@@ -1,4 +1,30 @@
 /**
+ * A collection of static utility functions for performing mathematical operations on scalar values.
+ */
+export class VectorMath {
+    /**
+     * Clamps a scalar between a minimum and maximum value.
+     * @param {number} value - The scalar to clamp.
+     * @param {number} min - The minimum value.
+     * @param {number} max - The maximum value.
+     * @returns {number} The clamped value.
+     */
+    static clamp( value, min, max ) {
+        return Math.min( Math.max( value, min ), max )
+    }
+
+    /**
+     * Clamps a scalar to the 0 to 1 range.
+     * @param {number} value - The scalar to clamp.
+     * @returns {number} The clamped value.
+     */
+    static saturate( value ) {
+        return VectorMath.clamp( value, 0, 1 )
+    }
+}
+
+
+/**
  * A 2D vector class that inherits from Float64Array for performance reasons.
  * @extends Float64Array
  */

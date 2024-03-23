@@ -1,4 +1,4 @@
-import { SVG, Vector2D as vec } from "../svg.js"
+import { SVG, Vector2D as vec, VectorMath as vmath } from "../svg.js"
 
 const globalSVG = new SVG( "#canvas", "fit" )
 
@@ -39,7 +39,7 @@ class Boid {
 
 const count = 1000
 const size = 0.3
-const boids = Array.from( { length: count } ).map( () => new Boid( vec.random().mul(.5).add(.5) ) )
+const boids = Array.from( { length: count } ).map( () => new Boid( vec.randomCircle().mul( Math.SQRT1_2 ).add( .5 ) ) )
 const elements = Array.from( { length: count } ).map( () => new SVG.line().width( size ) )
 
 console.log( boids )
@@ -49,21 +49,25 @@ function tick() {
     for ( const boid of boids ) {
         boid.acc = vec.zero
 
-        boid.acc = boid.acc.add( vec.randomCircle().mul( 0.001 ) )
+        boid.acc = boid.acc.add( vec.randomCircle().mul( 0.0005 ) )
 
         const mouseDistance = vec.distance( mappedMousePos, boid.pos )
-
         const mouseForce = boid.pos.sub( mappedMousePos ).normalize()
-            .mul( Math.max( 0, 1 / ( mouseDistance + 0.25 ) ** 2 ) )
+            .mul( ( mouseDistance + 0.25 ) ** -2 )
             .mul( mousePressed * ( mousePressed > 0 ? 0.5 : 1 ) )
             .mul( 0.0005 )
         boid.acc = boid.acc.add( mouseForce )
 
-        const friction = boid.vel.mul( -0.05 )
+        const friction = boid.vel.mul( -0.02 )
         boid.acc = boid.acc.add( friction )
 
         boid.vel = boid.vel.add( boid.acc )
-        boid.pos = boid.pos.add( boid.vel ).map( v => ( v % 1 + 1 ) % 1 )
+
+        if ( vec.distance( boid.pos, vec.new( .5 ) ) > Math.SQRT2 / 1.5 && vec.distance( boid.pos.add( boid.vel ), vec.new( .5 ) ) > vec.distance( boid.pos, vec.new( .5 ) ) ) {
+            boid.vel = vec.zero
+        } else {
+            boid.pos = boid.pos.add( boid.vel )
+        }
     }
 
     for ( let i = 0; i < count; i++ ) {

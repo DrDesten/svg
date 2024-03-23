@@ -1,4 +1,4 @@
-import { Vector2D as vec } from "./vector.js"
+import { Vector2D as vec, VectorMath as vmath } from "./vector.js"
 
 class SVGTemplate {
     /** @param {string} type */
@@ -811,3 +811,4 @@ export const SVG = Object.freeze( Object.assign(
     arc: SVGArc,
 } ) )
 export const Vector2D = vec
+export const VectorMath = vmath
