@@ -63,7 +63,7 @@ export class Vector2D extends Float64Array {
      * @param {number|bigint} y - The y component of the vector if two arguments are provided.
      * @returns {Vector2D} A new Vector2D instance.
      */
-     static new( x, y ) {
+    static new( x, y ) {
         if ( x === undefined && y === undefined ) {
             return Vector2D.zero
         }
@@ -177,12 +177,9 @@ export class Vector2D extends Float64Array {
      * @returns {Vector2D} A new Vector2D instance with the result of the addition.
      */
     add( other ) {
-        if ( other instanceof Vector2D ) {
-            return new Vector2D( this.x + other.x, this.y + other.y )
-        } else if ( typeof other === 'number' ) {
-            return new Vector2D( this.x + other, this.y + other )
-        }
-        return Vector2D.NaN
+        return other instanceof Vector2D
+            ? new Vector2D( this.x + other.x, this.y + other.y )
+            : new Vector2D( this.x + other, this.y + other )
     }
 
     /**
@@ -191,12 +188,9 @@ export class Vector2D extends Float64Array {
      * @returns {Vector2D} A new Vector2D instance with the result of the subtraction.
      */
     sub( other ) {
-        if ( other instanceof Vector2D ) {
-            return new Vector2D( this.x - other.x, this.y - other.y )
-        } else if ( typeof other === 'number' ) {
-            return new Vector2D( this.x - other, this.y - other )
-        }
-        return Vector2D.NaN
+        return other instanceof Vector2D
+            ? new Vector2D( this.x - other.x, this.y - other.y )
+            : new Vector2D( this.x - other, this.y - other )
     }
 
     /**
@@ -205,12 +199,9 @@ export class Vector2D extends Float64Array {
      * @returns {Vector2D} A new Vector2D instance with the result of the multiplication.
      */
     mul( other ) {
-        if ( other instanceof Vector2D ) {
-            return new Vector2D( this.x * other.x, this.y * other.y )
-        } else if ( typeof other === 'number' ) {
-            return new Vector2D( this.x * other, this.y * other )
-        }
-        return Vector2D.NaN
+        return other instanceof Vector2D
+            ? new Vector2D( this.x * other.x, this.y * other.y )
+            : new Vector2D( this.x * other, this.y * other )
     }
 
     /**
@@ -219,12 +210,31 @@ export class Vector2D extends Float64Array {
      * @returns {Vector2D} A new Vector2D instance with the result of the division.
      */
     div( other ) {
-        if ( other instanceof Vector2D ) {
-            return new Vector2D( this.x / other.x, this.y / other.y )
-        } else if ( typeof other === 'number' ) {
-            return new Vector2D( this.x / other, this.y / other )
-        }
-        return Vector2D.NaN
+        return other instanceof Vector2D
+            ? new Vector2D( this.x / other.x, this.y / other.y )
+            : new Vector2D( this.x / other, this.y / other )
+    }
+
+    /**
+     * Raises this vector to the power of a scalar or another vector.
+     * @param {Vector2D|number} other - The scalar or vector exponent.
+     * @returns {Vector2D} A new Vector2D instance with the result of the power operation.
+     */
+    pow( other ) {
+        return other instanceof Vector2D
+            ? new Vector2D( Math.pow( this.x, other.x ), Math.pow( this.y, other.y ) )
+            : new Vector2D( Math.pow( this.x, other ), Math.pow( this.y, other ) )
+    }
+
+    /**
+     * Computes the remainder of this vector divided by a scalar or another vector.
+     * @param {Vector2D|number} other - The scalar or vector divisor.
+     * @returns {Vector2D} A new Vector2D instance with the result of the remainder operation.
+     */
+    remainder( other ) {
+        return other instanceof Vector2D
+            ? new Vector2D( this.x % other.x, this.y % other.y )
+            : new Vector2D( this.x % other, this.y % other )
     }
 
     /**
@@ -246,6 +256,15 @@ export class Vector2D extends Float64Array {
             return Vector2D.zero
         }
         return new Vector2D( this.x / length, this.y / length )
+    }
+
+    /**
+     * Applies a function element-wise to this vector.
+     * @param {(value:number)=>number} func - The function to apply.
+     * @returns {Vector2D} A new vector with the result of the function application.
+     */
+    map( func ) {
+        return new Vector2D( func( this.x ), func( this.y ) )
     }
 
 
