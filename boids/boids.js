@@ -80,15 +80,19 @@ function tick() {
         let opacity = Math.sqrt( 1 / ( 1 + vec.distance( mappedPos, mappedVel ) / size ) )
         let color = [255, 255, 255]
 
+        let speed = boid.vel.length()
         let red = boid.vel.normalize().sub( boid.acc.normalize() ).length() * boid.acc.length() ** 2
         red = ( red * 10000 + 1 ) ** -2
+
+        let blue = vec.new( ( speed * 50 ) ** 2 )
+            .map( v => v / ( v + 1 ) )
+            .mul( new vec( 1, 0.7 ) )
+            .map( v => 1 - v * red )
+
         color[1] *= red
         color[2] *= red
-
-        /* let blue = boid.vel.length() * red 
-        blue = blue ** -2
-        color[0] *= blue
-        color[1] *= blue */
+        color[0] *= blue.x
+        color[1] *= blue.y
 
         ele.start( ...mappedPos ).end( ...mappedVel ).color( `rgb(${color[0]}, ${color[1]}, ${color[2]})` ).opacity( opacity ).update()
     }
