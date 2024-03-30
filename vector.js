@@ -159,11 +159,11 @@ export class Vector2D extends Float64Array {
      * @param {Vector2D|number} value - The new vector or scalar value to set.
      */
     set xy( value ) {
-        if ( value instanceof Vector2D ) {
+        if ( typeof value === "number") {
+            this.x = this.y = value
+        } else {
             this.x = value.x
             this.y = value.y
-        } else {
-            this.x = this.y = value
         }
     }
 
@@ -177,11 +177,11 @@ export class Vector2D extends Float64Array {
      * @param {Vector2D|number} value - The new vector or scalar value to set.
      */
     set yx( value ) {
-        if ( value instanceof Vector2D ) {
+        if ( typeof value === "number") {
+            this.x = this.y = value
+        } else {
             this.y = value.x
             this.x = value.y
-        } else {
-            this.x = this.y = value
         }
     }
 
@@ -301,10 +301,7 @@ export class Vector2D extends Float64Array {
      * @returns {number} The dot product of the two vectors.
      */
     static dot( a, b ) {
-        if ( a instanceof Vector2D && b instanceof Vector2D ) {
-            return a.x * b.x + a.y * b.y
-        }
-        return NaN
+        return a.x * b.x + a.y * b.y
     }
 
     /**
@@ -327,11 +324,8 @@ export class Vector2D extends Float64Array {
      * @returns {number} The distance between the two vectors.
      */
     static distance( a, b ) {
-        if ( a instanceof Vector2D && b instanceof Vector2D ) {
-            const dx = a.x - b.x
-            const dy = a.y - b.y
-            return Math.sqrt( dx * dx + dy * dy )
-        }
-        return NaN
+        const dx = a.x - b.x
+        const dy = a.y - b.y
+        return Math.sqrt( dx * dx + dy * dy )
     }
 }
