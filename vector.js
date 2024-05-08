@@ -76,8 +76,8 @@ export class Vector2D extends Float64Array {
         return Vector2D.randomAngle().mul( Math.sqrt( Math.random() ) )
     }
     /**
-     * Creates a unit length vector from a random angle.
-     * @returns {Vector2D} A new Vector2D instance with the random unit length vector components.
+     * Creates a random vector on the unit disk.
+     * @returns {Vector2D} A new Vector2D instance with the random components.
      */
     static randomAngle() {
         return Vector2D.fromAngle( Math.random() * 2 * Math.PI )
@@ -159,7 +159,7 @@ export class Vector2D extends Float64Array {
      * @param {Vector2D|number} value - The new vector or scalar value to set.
      */
     set xy( value ) {
-        if ( typeof value === "number") {
+        if ( typeof value === "number" ) {
             this.x = this.y = value
         } else {
             this.x = value.x
@@ -177,7 +177,7 @@ export class Vector2D extends Float64Array {
      * @param {Vector2D|number} value - The new vector or scalar value to set.
      */
     set yx( value ) {
-        if ( typeof value === "number") {
+        if ( typeof value === "number" ) {
             this.x = this.y = value
         } else {
             this.y = value.x
