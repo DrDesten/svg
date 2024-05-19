@@ -1,5 +1,23 @@
 import { Vector2D as vec, VectorMath as vmath } from "./vector.js"
 
+const Defaults = {
+    line: {
+        "fill": "none",
+        "stroke-width": "10",
+        "stroke": "black",
+        "stroke-linecap": "round",
+    },
+    fill: {
+        "fill": "black",
+        "stroke-width": "10",
+        "stroke": "none",
+        "stroke-linecap": "round",
+    },
+    text: {
+        "style": "font: 10px sans-serif"
+    }
+}
+
 class SVGTemplate {
     /** @param {string} type */
     constructor( type ) {
@@ -12,6 +30,8 @@ class SVGTemplate {
     }
     /** @param {string} attribute @param {string} value */
     set( attribute, value ) { return this.ele.setAttribute( attribute, value ), this.attributes[attribute] = value, this }
+    /** @param {string} attribute */
+    unset( attribute ) { return this.ele.removeAttribute( attribute ), this }
 
     /** @param {Object.<string,string>} defaults @param {Object.<string,string>} override */
     setDefaults( defaults, override ) {
@@ -171,36 +191,13 @@ class SVGTemplate {
 
         }
     }
-
-
-    // Defaults //////////////////////////////////////////////
-
-    /** @returns {Object.<string,string>} */
-    static get lineDefaults() {
-        return {
-            "fill": "none",
-            "stroke-width": "10",
-            "stroke": "black",
-            "stroke-linecap": "round",
-        }
-    }
-
-    /** @returns {Object.<string,string>} */
-    static get fillDefaults() {
-        return {
-            "fill": "black",
-            "stroke-width": "10",
-            "stroke": "none",
-            "stroke-linecap": "round",
-        }
-    }
 }
 
 class SVGArc extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
         super( "path" )
-        this.setDefaults( SVGTemplate.lineDefaults, opts )
+        this.setDefaults( Defaults.line, opts )
 
         /** @private */
         this.centerPosition = vec.zero
@@ -318,7 +315,7 @@ class SVGPath extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
         super( "path" )
-        this.setDefaults( SVGTemplate.lineDefaults, opts )
+        this.setDefaults( Defaults.line, opts )
 
         /** @private @type {'line'|'cubic bezier'|'quadratic bezier'|'custom'} */
         this.pathMode = "line"
@@ -456,7 +453,7 @@ class SVGLine extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
         super( "line" )
-        this.setDefaults( SVGTemplate.lineDefaults, opts )
+        this.setDefaults( Defaults.line, opts )
 
         /** @private */
         this.coordinateMode = "point"
@@ -522,7 +519,7 @@ class SVGCircle extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
         super( "circle" )
-        this.setDefaults( SVGTemplate.fillDefaults, opts )
+        this.setDefaults( Defaults.fill, opts )
 
         /** @private */
         this.centerPosition = vec.zero
@@ -560,7 +557,7 @@ class SVGEllipse extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
         super( "ellipse" )
-        this.setDefaults( SVGTemplate.fillDefaults, opts )
+        this.setDefaults( Defaults.fill, opts )
 
         /** @private */
         this.centerPosition = vec.zero
@@ -602,7 +599,7 @@ class SVGRectangle extends SVGTemplate {
     /** @param {Object.<string,string>} opts */
     constructor( opts = {} ) {
         super( "rect" )
-        this.setDefaults( SVGTemplate.fillDefaults, opts )
+        this.setDefaults( Defaults.fill, opts )
 
         /** @private */
         this.coordinateMode = "corner"
@@ -682,18 +679,115 @@ class SVGRectangle extends SVGTemplate {
     }
 }
 
+class SVGText extends SVGTemplate {
+    /** @param {Object.<string,string>} opts */
+    constructor( opts = {} ) {
+        super( "text" )
+        this.setDefaults( Defaults.text, opts )
+
+        /** @private */
+        this.string = ""
+        /** @private */
+        this.textPos = vec.zero
+        /** @private */
+        this.textLengthAdjust = "spacing"
+        /** @private */
+        this.textLength = ""
+    }
+
+    /**
+     * Sets the text to display.
+     * @param {string} text - The text to display.
+     */
+    text( text ) { return this.string = text, this }
+
+    /**
+     * Sets the position of the text.
+     * @param {number} x - The x coordinate of the text.
+     * @param {number=} y - The y coordinate of the text. If not provided, the x coordinate is used for both x and y.
+     */
+    pos( x, y ) { return this.textPos = new vec( x, y ?? x ), this }
+
+    /**
+     * Sets the length adjustment of the text.
+     * @param {"spacing"|"spacingAndGlyphs"|"none"} lengthAdjust - The length adjustment to use. Possible values are "spacing", "spacingAndGlyphs", and "none".
+     */
+    lengthAdjust( lengthAdjust ) { return this.textLengthAdjust = lengthAdjust, this }
+
+    /**
+     * Sets the length of the text.
+     * @param {"length"|"ideographic"|"discretionary"|"none"} length - The length to use. Possible values are "length", "ideographic", "discretionary", and "none".
+     */
+    length( length ) { return this.textLength = length, this }
+
+    /**
+     * Updates the text to reflect any changes to its properties.
+     * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized.
+     */
+    update( millisecondsSinceInitialisation = Infinity ) {
+        // If an update callback function has been set, call it.
+        if ( this.updateCallback != undefined ) this.updateCallback.call( this, this, millisecondsSinceInitialisation )
+        // Update the SVG text element to reflect the current text value.
+        this.set( "x", this.textPos.x )
+            .set( "y", this.textPos.y )
+            .set( "lengthAdjust", this.textLengthAdjust )
+        if ( this.textLength ) this.set( "textLength", this.textLength )
+        else this.unset( "textLength" )
+        this.ele.innerHTML = this.string
+    }
+}
+
+class SVGGroup extends SVGTemplate {
+    /** @param {Object.<string,string>} opts */
+    constructor( opts = {} ) {
+        super( "g" )
+        this.setDefaults( {}, opts )
+        this.children = []
+    }
+
+    /** 
+     * Updates the rectangle to reflect any changes to its properties.
+     * @param {number} millisecondsSinceInitialisation - The number of milliseconds since the object was initialized. 
+     */
+    update( millisecondsSinceInitialisation = Infinity ) {
+        // If an update callback function has been set, call it.
+        if ( this.updateCallback != undefined ) this.updateCallback.call( this, this, millisecondsSinceInitialisation )
+        // Update the SVG group element to reflect the current children.
+        this.children.forEach( child => child.update( millisecondsSinceInitialisation ) )
+        return this
+    }
+
+    /** 
+     * Adds new children to the SVG group.
+     * @param {SVGTemplate[]} SVGElements - The elements to be added as children of the SVG image.
+     */
+    add( ...SVGElements ) {
+        for ( const ele of SVGElements ) {
+            this.children.push( ele )
+            this.ele.appendChild( ele.ele )
+        }
+        return this
+    }
+}
+
 class SVGGlobal {
     /**
      * Returns a new SVG element, bound to a parent element specified by a query selector.
      * The SVG element will take up the entire size of the parent element, with its elements positioned relatively within a [0, 100] range.
-     * @param {string} parentQuerySelector - The query selector used to find the parent element for the SVG image.
+     * @param {string|HTMLElement} parent - The query selector used to find the parent element for the SVG image or an HTML element.
      * @param {"stretch"|"cover"|"fit"|"fixed"} fitMode - The query selector used to find the parent element for the SVG image.
      */
-    constructor( parentQuerySelector, fitMode = "stretch" ) {
+    constructor( parent, fitMode = "stretch" ) {
 
-        this.parent = document.querySelector( parentQuerySelector )
-        if ( this.parent == null ) {
-            throw new Error( `SVG(): Unable to bind parent. Query selector '${parentQuerySelector}' does not match a DOM element.` )
+        if ( typeof parent === "string" ) {
+
+            this.parent = document.querySelector( parent )
+            if ( this.parent == null ) {
+                throw new Error( `SVG(): Unable to bind parent. Query selector '${parent}' does not match a DOM element.` )
+            }
+
+        } else {
+            this.parent = parent
         }
 
         this.svg = document.createElementNS( "http://www.w3.org/2000/svg", "svg" )
@@ -788,6 +882,19 @@ class SVGGlobal {
         this.resizeObserver?.disconnect()
     }
 
+    /**
+     * Maps the mouse position to the SVG element.
+     * @param {Vector2D} mousePos 
+     * @returns {Vector2D}
+     */
+    mapMouse( mousePos ) {
+        const rect = this.svg.getBoundingClientRect()
+        return new vec(
+            ( mousePos.x - rect.left ) / rect.width,
+            1 - ( mousePos.y - rect.top ) / rect.height
+        )
+    }
+
     /** 
      * Adds new children to the SVG element.
      * @param {SVGTemplate[]} SVGElements - The elements to be added as children of the SVG image.
@@ -803,6 +910,8 @@ class SVGGlobal {
 
 export const SVG = Object.freeze( Object.assign(
     SVGGlobal, {
+    g: SVGGroup,
+    text: SVGText,
     rect: SVGRectangle,
     circle: SVGCircle,
     ellipse: SVGEllipse,
