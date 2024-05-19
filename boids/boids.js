@@ -95,7 +95,7 @@ function tick() {
         color.r *= blue.x
         color.g *= blue.y
 
-        ele.start( ...mappedPos ).end( ...mappedVel ).color( `rgb(${[...vec3.mul( color, 255 )]})` ).opacity( opacity ).update()
+        ele.start( ...mappedPos ).end( ...mappedVel ).color( color.toCSSColor( { hex: true } ) ).opacity( opacity ).update()
     }
 
 }

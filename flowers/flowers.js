@@ -1,10 +1,10 @@
-import { SVG, Vector2D as vec } from "../svg.js"
+import { SVG, vec2 } from "../svg.js"
 
 const globalSVG = new SVG( "#canvas" )
 
 const maxCorners = 16
 const maxRadius = 32
-const center = vec.new( 50 )
+const center = new vec2( 50 )
 
 const layers = 10
 
@@ -21,7 +21,7 @@ for ( let i = 0; i < layers; i++ ) {
     for ( let o = 0; o < corners; o++ ) {
         const sub = ( o % 2 ) * radius / 4
         const angle = ( 2 * Math.PI ) * ( o / corners ) + i ** .5
-        path.point( ...vec.fromAngle( angle ).mul( radius - sub ).add( center ) )
+        path.point( ...vec2.fromAngle( angle ).mul( radius - sub ).add( center ) )
     }
 
     path.close()
