@@ -1,0 +1,3 @@
+[submodule "jvec"]
+	path = jvec
+	url = https://github.com/DrDesten/jvec.git
