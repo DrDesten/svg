@@ -1,21 +1,18 @@
-import { SVG, Vector2D as vec, VectorMath as vmath } from "../svg.js"
+import { SVG, vec2, vec3 } from "../svg.js"
 
 const globalSVG = new SVG( "#canvas", "fit" )
 
 let mousePressed = 0
-const mousePos = vec.zero
-const mappedMousePos = vec.zero
+const mousePos = new vec2
+const mappedMousePos = new vec2
 
 document.addEventListener( "mousemove", e => {
-    mousePos.xy = new vec( e.clientX, e.clientY )
+    mousePos.xy = new vec2( e.clientX, e.clientY )
 
     const rect = globalSVG.svg.getBoundingClientRect()
-    const relative = mousePos.sub( vec.new( rect ) )
-    const scaled = relative.div( new vec(
-        rect.right - rect.left,
-        rect.bottom - rect.top
-    ) )
-    mappedMousePos.xy = new vec( scaled.x, 1 - scaled.y )
+    const relative = mousePos.clone().sub( new vec2( rect ) )
+    const scaled = relative.clone().div( new vec2( rect.width, rect.height ) )
+    mappedMousePos.xy = new vec2( scaled.x, 1 - scaled.y )
 } )
 
 document.addEventListener( "mousedown", e => {
@@ -29,44 +26,48 @@ document.addEventListener( "mousedown", e => {
 document.addEventListener( "mouseup", () => mousePressed = 0 )
 
 class Boid {
-    /** @param {vec} pos */
+    /** @param {vec2} pos */
     constructor( pos ) {
         this.pos = pos
-        this.vel = vec.zero
-        this.acc = vec.zero
+        this.vel = new vec2
+        this.acc = new vec2
     }
 }
 
 const count = 1000
 const size = 0.3
-const boids = Array.from( { length: count } ).map( () => new Boid( vec.randomCircle().mul( Math.SQRT1_2 ).add( .5 ) ) )
-const elements = Array.from( { length: count } ).map( () => new SVG.line().width( size ) )
+const boids = Array.from( { length: count }, () => new Boid( vec2.randomSphere().mul( Math.SQRT1_2 ).add( .5 ) ) )
+const elements = Array.from( { length: count }, () => new SVG.line().width( size ) )
 
 console.log( boids )
 
 function tick() {
 
     for ( const boid of boids ) {
-        boid.acc = vec.zero
+        boid.acc = new vec2
 
-        boid.acc = boid.acc.add( vec.randomCircle().mul( 0.0005 ) )
+        boid.acc.add( vec2.randomSphere().mul( 0.0005 ) )
 
-        const mouseDistance = vec.distance( mappedMousePos, boid.pos )
-        const mouseForce = boid.pos.sub( mappedMousePos ).normalize()
+        const mouseDistance = vec2.distance( mappedMousePos, boid.pos )
+        const mouseForce = boid.pos.clone()
+            .sub( mappedMousePos ).normalize()
             .mul( ( mouseDistance + 0.25 ) ** -2 )
             .mul( mousePressed * ( mousePressed > 0 ? 0.5 : 1 ) )
             .mul( 0.0005 )
-        boid.acc = boid.acc.add( mouseForce )
+        boid.acc.add( mouseForce )
 
-        const friction = boid.vel.mul( -0.02 )
-        boid.acc = boid.acc.add( friction )
+        const friction = boid.vel.clone().mul( -0.02 )
+        boid.acc.add( friction )
 
-        boid.vel = boid.vel.add( boid.acc )
+        boid.vel.add( boid.acc )
 
-        if ( vec.distance( boid.pos, vec.new( .5 ) ) > Math.SQRT2 / 1.5 && vec.distance( boid.pos.add( boid.vel ), vec.new( .5 ) ) > vec.distance( boid.pos, vec.new( .5 ) ) ) {
-            boid.vel = vec.zero
+        if (
+            vec2.distance( boid.pos, new vec2( .5 ) ) > Math.SQRT2 / 1.5 &&
+            vec2.distance( boid.pos.clone().add( boid.vel ), new vec2( .5 ) ) > vec2.distance( boid.pos, new vec2( .5 ) )
+        ) {
+            boid.vel = new vec2
         } else {
-            boid.pos = boid.pos.add( boid.vel )
+            boid.pos.add( boid.vel )
         }
     }
 
@@ -74,27 +75,27 @@ function tick() {
         const boid = boids[i]
         const ele = elements[i]
 
-        let mappedPos = boid.pos.mul( 100 )
-        let mappedVel = mappedPos.sub( boid.vel.mul( 100 ) )
+        let mappedPos = boid.pos.clone().mul( 100 )
+        let mappedVel = mappedPos.clone().sub( boid.vel.clone().mul( 100 ) )
 
-        let opacity = Math.sqrt( 1 / ( 1 + vec.distance( mappedPos, mappedVel ) / size ) )
-        let color = [255, 255, 255]
+        let opacity = Math.sqrt( 1 / ( 1 + vec2.distance( mappedPos, mappedVel ) / size ) )
+        let color = new vec3( 1 )
 
         let speed = boid.vel.length()
-        let red = boid.vel.normalize().sub( boid.acc.normalize() ).length() * boid.acc.length() ** 2
+        let red = vec2.normalize( boid.vel ).sub( vec2.normalize( boid.acc ) ).length() * boid.acc.length() ** 2
         red = ( red * 10000 + 1 ) ** -2
 
-        let blue = vec.new( ( speed * 50 ) ** 2 )
-            .map( v => v / ( v + 1 ) )
-            .mul( new vec( 1, 0.7 ) )
-            .map( v => 1 - v * red )
+        let blue = new vec2( ( speed * 50 ) ** 2 )
+            .apply( v => v / ( v + 1 ) )
+            .mul( new vec2( 1, 0.7 ) )
+            .apply( v => 1 - v * red )
 
-        color[1] *= red
-        color[2] *= red
-        color[0] *= blue.x
-        color[1] *= blue.y
+        color.g *= red
+        color.b *= red
+        color.r *= blue.x
+        color.g *= blue.y
 
-        ele.start( ...mappedPos ).end( ...mappedVel ).color( `rgb(${color[0]}, ${color[1]}, ${color[2]})` ).opacity( opacity ).update()
+        ele.start( ...mappedPos ).end( ...mappedVel ).color( `rgb(${[...vec3.mul( color, 255 )]})` ).opacity( opacity ).update()
     }
 
 }

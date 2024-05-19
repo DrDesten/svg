@@ -1,4 +1,5 @@
-import { Vector2D as vec, VectorMath as vmath } from "./vector.js"
+export { vec2, vec3, vec4 } from "./jvec/bin/vec.js"
+import { vec2 } from "./jvec/bin/vec.js"
 
 const Defaults = {
     line: {
@@ -95,10 +96,10 @@ class SVGTemplate {
      * Returns a point on a circle given an angle, radius and center  
      * @param {number} angle 
      * @param {number} radius 
-     * @param {vec} center 
+     * @param {vec2} center 
      **/
-    static circlePoint( angle, radius = 1, center = vec.zero ) {
-        return vec.fromAngle( angle ).mul( radius ).add( center )
+    static circlePoint( angle, radius = 1, center = new vec2 ) {
+        return vec2.fromAngle( angle ).mul( radius ).add( center )
     }
 
     // Curves ////////////////////////////////////////////////
@@ -108,16 +109,16 @@ class SVGTemplate {
 
             /**
              * Calculates the control point for a cubic Bezier curve.
-             * @param {vec} lastlast The previous point before the last point.
-             * @param {vec} last The last point.
-             * @param {vec} current The current point.
+             * @param {vec2} lastlast The previous point before the last point.
+             * @param {vec2} last The last point.
+             * @param {vec2} current The current point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
-             * @returns {{point: vec, guideVector: vec}} An object containing the calculated control point and the guide vector used to calculate it.
+             * @returns {{point: vec2, guideVector: vec2}} An object containing the calculated control point and the guide vector used to calculate it.
             */
             controlPoint1( lastlast, last, current, guideDistance ) {
-                guideDistance ??= vec.distance( last, current )
-                const guideVector = current.sub( lastlast ).normalize().mul( guideDistance / 3 )
-                const controlPoint = last.add( guideVector )
+                guideDistance ??= vec2.distance( last, current )
+                const guideVector = current.clone().sub( lastlast ).setLength( guideDistance / 3 )
+                const controlPoint = last.clone().add( guideVector )
                 return {
                     point: controlPoint,
                     guideVector: guideVector
@@ -126,16 +127,16 @@ class SVGTemplate {
 
             /**
              * Calculates the control point for a cubic Bezier curve.
-             * @param {vec} last The last point.
-             * @param {vec} current The current point.
-             * @param {vec} next The next point.
+             * @param {vec2} last The last point.
+             * @param {vec2} current The current point.
+             * @param {vec2} next The next point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
-             * @returns {{point: vec, guideVector: vec}} An object containing the calculated control point and the guide vector used to calculate it.
+             * @returns {{point: vec2, guideVector: vec2}} An object containing the calculated control point and the guide vector used to calculate it.
             */
             controlPoint2( last, current, next, guideDistance ) {
-                guideDistance ??= vec.distance( last, current )
-                const guideVector = last.sub( next ).normalize().mul( guideDistance / 3 )
-                const controlPoint = current.add( guideVector )
+                guideDistance ??= vec2.distance( last, current )
+                const guideVector = last.clone().sub( next ).setLength( guideDistance / 3 )
+                const controlPoint = current.clone().add( guideVector )
                 return {
                     point: controlPoint,
                     guideVector: guideVector
@@ -144,21 +145,21 @@ class SVGTemplate {
 
             /**
              * Calculates the control points for a cubic Bezier curve.
-             * @param {vec=} lastlast The previous point before the last point.
-             * @param {vec}  last The last point.
-             * @param {vec}  current The current point.
-             * @param {vec=} next The next point.
+             * @param {vec2=} lastlast The previous point before the last point.
+             * @param {vec2}  last The last point.
+             * @param {vec2}  current The current point.
+             * @param {vec2=} next The next point.
              * @param {number=} guideDistance The distance that the control point should be from the last point. If not specified, the distance is calculated from the last and current points.
              * @returns {[
-             *      {point: vec, guideVector: vec},
-             *      {point: vec, guideVector: vec}
+             *      {point: vec2, guideVector: vec2},
+             *      {point: vec2, guideVector: vec2}
              * ]} An array containing the two calculated control points and their corresponding guide vectors.
             */
             controlPoints( lastlast, last, current, next, guideDistance ) {
                 if ( !last || !current ) throw new Error( "SVGTemplate.cubicBezier.controlPoints(): 'last' or 'current' are undefined. Both are required to calculate control points" )
                 if ( !lastlast && !next ) throw new Error( "SVGTemplate.cubicBezier.controlPoints(): 'lastlast' and 'next' are undefined. At least one is required to calculate control points" )
 
-                guideDistance ??= vec.distance( last, current )
+                guideDistance ??= vec2.distance( last, current )
 
                 if ( lastlast && next ) { // Both are defined, simply calculate control points
                     return [
@@ -170,7 +171,7 @@ class SVGTemplate {
                 if ( next ) { // 'lastlast' is not defined
                     const cp2 = this.controlPoint2( last, current, next, guideDistance )
                     const cp1 = {
-                        point: cp2.guideVector.mul( 1.5 ).add( current ).sub( last ).div( 3 ).add( last ),
+                        point: cp2.guideVector.clone().mul( 1.5 ).add( current ).sub( last ).div( 3 ).add( last ),
                         guideVector: undefined
                     }
                     return [cp1, cp2]
@@ -179,7 +180,7 @@ class SVGTemplate {
                 if ( lastlast ) { // 'next' is not defined
                     const cp1 = this.controlPoint1( lastlast, last, current, guideDistance )
                     const cp2 = {
-                        point: cp1.guideVector.mul( 1.5 ).add( last ).sub( current ).div( 3 ).add( current ),
+                        point: cp1.guideVector.clone().mul( 1.5 ).add( last ).sub( current ).div( 3 ).add( current ),
                         guideVector: undefined
                     }
                     return [cp1, cp2]
@@ -200,7 +201,7 @@ class SVGArc extends SVGTemplate {
         this.setDefaults( Defaults.line, opts )
 
         /** @private */
-        this.centerPosition = vec.zero
+        this.centerPosition = new vec2
         /** @private */
         this.startAngle = 0
         /** @private */
@@ -215,7 +216,7 @@ class SVGArc extends SVGTemplate {
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
     center( x, y ) {
-        this.centerPosition = new vec( x, y ?? x )
+        this.centerPosition = new vec2( x, y ?? x )
         return this
     }
 
@@ -295,7 +296,7 @@ class SVGArc extends SVGTemplate {
 
 }
 
-class PathPoint extends vec {
+class PathPoint extends vec2 {
     /**
      * @param {'line'|'cubic bezier'|'quadratic bezier'|'close'|'custom'} type 
      * @param {number} x 
@@ -459,15 +460,15 @@ class SVGLine extends SVGTemplate {
         this.coordinateMode = "point"
         /** @private */
         this.angleMode = {
-            center: vec.zero,
+            center: new vec2,
             angle: 0,
             startRadius: 0,
             endRadius: 0,
         }
         /** @private */
         this.pointMode = {
-            start: vec.zero,
-            end: vec.zero,
+            start: new vec2,
+            end: new vec2,
         }
     }
 
@@ -475,12 +476,12 @@ class SVGLine extends SVGTemplate {
     mode( coordinateMode ) { return this.coordinateMode = coordinateMode, this }
 
     /** @param {number} x @param {number=} y */
-    start( x, y ) { return this.pointMode.start = new vec( x, y ?? x ), this.set( "x1", x ).set( "y1", y ) }
+    start( x, y ) { return this.pointMode.start = new vec2( x, y ?? x ), this.set( "x1", x ).set( "y1", y ) }
     /** @param {number} x @param {number=} y */
-    end( x, y ) { return this.pointMode.end = new vec( x, y ?? x ), this.set( "x2", x ).set( "y2", y ) }
+    end( x, y ) { return this.pointMode.end = new vec2( x, y ?? x ), this.set( "x2", x ).set( "y2", y ) }
 
     /** @param {number} x @param {number=} y */
-    center( x, y ) { return this.angleMode.center = new vec( x, y ?? x ), this }
+    center( x, y ) { return this.angleMode.center = new vec2( x, y ?? x ), this }
     /** @param {number} a */
     angle( a ) { return this.angleMode.angle = a, this }
     /** @param {number} a */
@@ -522,7 +523,7 @@ class SVGCircle extends SVGTemplate {
         this.setDefaults( Defaults.fill, opts )
 
         /** @private */
-        this.centerPosition = vec.zero
+        this.centerPosition = new vec2
         /** @private */
         this.circularRadius = 0
     }
@@ -532,7 +533,7 @@ class SVGCircle extends SVGTemplate {
      * @param {number} x - The x coordinate of the center.
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
-    center( x, y ) { return this.centerPosition = new vec( x, y ?? x ), this }
+    center( x, y ) { return this.centerPosition = new vec2( x, y ?? x ), this }
     /** 
      * Sets the radius of the circle.
      * @param {number} r - The radius of the circle.
@@ -560,9 +561,9 @@ class SVGEllipse extends SVGTemplate {
         this.setDefaults( Defaults.fill, opts )
 
         /** @private */
-        this.centerPosition = vec.zero
+        this.centerPosition = new vec2
         /** @private */
-        this.ellipseRadii = vec.zero
+        this.ellipseRadii = new vec2
     }
 
     /** 
@@ -570,13 +571,13 @@ class SVGEllipse extends SVGTemplate {
      * @param {number} x - The x coordinate of the center.
      * @param {number=} y - The y coordinate of the center. If not provided, the x coordinate is used for both x and y.
      */
-    center( x, y ) { return this.centerPosition = new vec( x, y ?? x ), this }
+    center( x, y ) { return this.centerPosition = new vec2( x, y ?? x ), this }
     /** 
      * Sets the radius of the circle.
      * @param {number} rx - The x-radius of the ellipse.
      * @param {number=} ry - The y-radius of the ellipse. If not provided, the x-radius is used for both x and y.
      */
-    radius( rx, ry ) { return this.ellipseRadii = new vec( rx, ry ?? rx ), this }
+    radius( rx, ry ) { return this.ellipseRadii = new vec2( rx, ry ?? rx ), this }
 
     /** 
      * Updates the circle to reflect any changes to its properties.
@@ -604,11 +605,11 @@ class SVGRectangle extends SVGTemplate {
         /** @private */
         this.coordinateMode = "corner"
         /** @private */
-        this.rectangleDimensions = vec.zero
+        this.rectangleDimensions = new vec2
         /** @private */
-        this.rectanglePosition = vec.zero
+        this.rectanglePosition = new vec2
         /** @private */
-        this.borderRadii = vec.zero
+        this.borderRadii = new vec2
     }
 
     /**
@@ -622,21 +623,21 @@ class SVGRectangle extends SVGTemplate {
      * @param {number} width - The width of the rectangle.
      * @param {number=} height - The height of the rectangle. If not provided, the width is used for both width and height.
      */
-    dimensions( width, height ) { return this.rectangleDimensions = new vec( width, height ?? width ), this }
+    dimensions( width, height ) { return this.rectangleDimensions = new vec2( width, height ?? width ), this }
 
     /**
      * Sets the position of the rectangle.
      * @param {number} x - The x coordinate of the rectangle.
      * @param {number=} y - The y coordinate of the rectangle. If not provided, the x coordinate is used for both x and y.
      */
-    position( x, y ) { return this.rectanglePosition = new vec( x, y ?? x ), this }
+    position( x, y ) { return this.rectanglePosition = new vec2( x, y ?? x ), this }
 
     /**
      * Sets the border radii of the rectangle.
      * @param {number} rx - The x coordinate of the border radius.
      * @param {number=} ry - The y coordinate of the border radius. If not provided, the x coordinate is used for both x and y.
      */
-    radius( rx, ry ) { return this.borderRadii = new vec( rx, ry ?? rx ), this }
+    radius( rx, ry ) { return this.borderRadii = new vec2( rx, ry ?? rx ), this }
 
     /** 
      * Updates the rectangle to reflect any changes to its properties.
@@ -688,7 +689,7 @@ class SVGText extends SVGTemplate {
         /** @private */
         this.string = ""
         /** @private */
-        this.textPos = vec.zero
+        this.textPos = new vec2
         /** @private */
         this.textLengthAdjust = "spacing"
         /** @private */
@@ -706,7 +707,7 @@ class SVGText extends SVGTemplate {
      * @param {number} x - The x coordinate of the text.
      * @param {number=} y - The y coordinate of the text. If not provided, the x coordinate is used for both x and y.
      */
-    pos( x, y ) { return this.textPos = new vec( x, y ?? x ), this }
+    pos( x, y ) { return this.textPos = new vec2( x, y ?? x ), this }
 
     /**
      * Sets the length adjustment of the text.
@@ -843,7 +844,7 @@ class SVGGlobal {
 
             // Get the size of the parent element.
             const parent = entries[0]
-            const size = new vec( parent.target.clientWidth, parent.target.clientHeight )
+            const size = new vec2( parent.target.clientWidth, parent.target.clientHeight )
             const max = Math.max( size.x, size.y )
 
             // Scale the SVG element according to the parent size.
@@ -864,7 +865,7 @@ class SVGGlobal {
 
             // Get the size of the parent element.
             const parent = entries[0]
-            const size = new vec( parent.target.clientWidth, parent.target.clientHeight )
+            const size = new vec2( parent.target.clientWidth, parent.target.clientHeight )
             const min = Math.min( size.x, size.y )
 
             // Scale the SVG element according to the parent size.
@@ -889,7 +890,7 @@ class SVGGlobal {
      */
     mapMouse( mousePos ) {
         const rect = this.svg.getBoundingClientRect()
-        return new vec(
+        return new vec2(
             ( mousePos.x - rect.left ) / rect.width,
             1 - ( mousePos.y - rect.top ) / rect.height
         )
@@ -919,5 +920,3 @@ export const SVG = Object.freeze( Object.assign(
     path: SVGPath,
     arc: SVGArc,
 } ) )
-export const Vector2D = vec
-export const VectorMath = vmath
